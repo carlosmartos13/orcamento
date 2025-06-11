@@ -248,7 +248,7 @@ const Summary = ({ formData }: SummaryProps) => {
                 </Table>
               </TableContainer>
 
-              {/* Lista de Equipamentos Selecionados (sem imagens para PDF) */}
+              {/* Galeria de Imagens dos Equipamentos */}
               <Box sx={{ mt: 3 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#000' }}>
                   Equipamentos Selecionados:
@@ -257,18 +257,50 @@ const Summary = ({ formData }: SummaryProps) => {
                   {Object.entries(formData.equipment).map(([key, quantity]) => {
                     if (quantity > 0) {
                       const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                      if (equipmentItem) {
+                      if (equipmentItem && equipmentItem.image) {
                         return (
                           <Grid item xs={6} sm={4} md={3} key={key}>
-                            <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, backgroundColor: '#fafafa' }}>
-                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1 }}>
+                            <Box sx={{ 
+                              textAlign: 'center', 
+                              p: 2, 
+                              border: '1px solid #e0e0e0', 
+                              borderRadius: 2, 
+                              backgroundColor: '#fafafa',
+                              minHeight: '200px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <img 
+                                src={equipmentItem.image} 
+                                alt={equipmentItem.name}
+                                style={{ 
+                                  width: '100%', 
+                                  maxWidth: '120px', 
+                                  height: 'auto',
+                                  maxHeight: '100px',
+                                  objectFit: 'contain',
+                                  marginBottom: '12px',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  padding: '4px',
+                                  backgroundColor: '#fff'
+                                }} 
+                                onError={(e) => {
+                                  // Fallback caso a imagem não carregue
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                }}
+                              />
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
                                 {equipmentItem.name}
                               </Typography>
-                              <Typography variant="caption" sx={{ color: '#666' }}>
+                              <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
                                 Quantidade: {quantity}
                               </Typography>
-                              <Typography variant="caption" display="block" sx={{ color: '#666' }}>
-                                Valor: R$ {equipmentItem.price.toFixed(2)}
+                              <Typography variant="caption" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                                R$ {equipmentItem.price.toFixed(2)}
                               </Typography>
                             </Box>
                           </Grid>
