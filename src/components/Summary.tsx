@@ -3,7 +3,7 @@ import { FormData } from '../types';
 import { usePricing } from '../hooks/usePricing';
 import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage } from '../utils/calculations';
 import { formatCurrencyValue } from '../utils/formatCurrency';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -21,6 +21,8 @@ interface SummaryProps {
 
 const Summary = ({ formData }: SummaryProps) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [imagesBase64, setImagesBase64] = useState<Record<string, string>>({});
+  const [logoBase64, setLogoBase64] = useState<string>('');
   
   const page1Ref = useRef<HTMLDivElement>(null);
   const page2Ref = useRef<HTMLDivElement>(null);
@@ -32,12 +34,6 @@ const Summary = ({ formData }: SummaryProps) => {
   const monthlyTotal = calculateMonthlyTotal(formData, pricing);
   const equipmentTotal = calculateEquipmentTotal(formData, pricing);
 
-  const handleWhatsApp = () => {
-    const message = generateWhatsAppMessage(formData, pricing, monthlyTotal, equipmentTotal);
-    const fullMessage = encodeURIComponent(message);
-    window.open(`https://api.whatsapp.com/send?&text=${fullMessage}`, '_blank');
-  };
-
   // Mapeamento das imagens
   const equipmentImages = {
     androidPdvGertec: gs300,
@@ -47,6 +43,55 @@ const Summary = ({ formData }: SummaryProps) => {
     raspberryServer: raspberryServer,
     'Elgin M10 Pro': raspberryServer,
     'Tanca tp-650': raspberryServer,
+  };
+
+  // Função para converter imagem para base64
+  const imageToBase64 = (src: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx?.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
+
+  // Carregar todas as imagens como base64 quando o componente monta
+  useEffect(() => {
+    const loadImages = async () => {
+      try {
+        // Carregar logo
+        const logoB64 = await imageToBase64('/logo.png');
+        setLogoBase64(logoB64);
+
+        // Carregar imagens dos equipamentos
+        const imagePromises = Object.entries(equipmentImages).map(async ([key, src]) => {
+          const base64 = await imageToBase64(src);
+          return [key, base64];
+        });
+
+        const results = await Promise.all(imagePromises);
+        const imagesMap = Object.fromEntries(results);
+        setImagesBase64(imagesMap);
+      } catch (error) {
+        console.error('Erro ao carregar imagens:', error);
+      }
+    };
+
+    loadImages();
+  }, []);
+
+  const handleWhatsApp = () => {
+    const message = generateWhatsAppMessage(formData, pricing, monthlyTotal, equipmentTotal);
+    const fullMessage = encodeURIComponent(message);
+    window.open(`https://api.whatsapp.com/send?&text=${fullMessage}`, '_blank');
   };
 
   // Função para gerar PDF com múltiplas páginas
@@ -69,6 +114,7 @@ const Summary = ({ formData }: SummaryProps) => {
           backgroundColor: '#ffffff',
           width: elementRef.current.scrollWidth,
           height: elementRef.current.scrollHeight,
+          logging: false,
         });
         
         const imgData = canvas.toDataURL('image/png');
@@ -142,15 +188,17 @@ const Summary = ({ formData }: SummaryProps) => {
         right: 0,
         zIndex: 1
       }}>
-        <img 
-          src="/logo.png" 
-          alt="Logo SEATEC" 
-          style={{ 
-            height: '80px', 
-            width: 'auto',
-            objectFit: 'contain'
-          }} 
-        />
+        {logoBase64 && (
+          <img 
+            src={logoBase64} 
+            alt="Logo SEATEC" 
+            style={{ 
+              height: '80px', 
+              width: 'auto',
+              objectFit: 'contain'
+            }} 
+          />
+        )}
       </Box>
       
       {/* Título centralizado */}
@@ -394,9 +442,9 @@ const Summary = ({ formData }: SummaryProps) => {
                   {Object.entries(formData.equipment).map(([key, quantity]) => {
                     if (quantity > 0) {
                       const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                      const imageUrl = equipmentImages[key as keyof typeof equipmentImages];
+                      const imageBase64 = imagesBase64[key];
                       
-                      if (equipmentItem && imageUrl) {
+                      if (equipmentItem && imageBase64) {
                         return (
                           <Grid item xs={6} sm={4} md={3} key={key}>
                             <Box sx={{ 
@@ -412,7 +460,7 @@ const Summary = ({ formData }: SummaryProps) => {
                               justifyContent: 'center'
                             }}>
                               <img 
-                                src={imageUrl} 
+                                src={imageBase64} 
                                 alt={equipmentItem.name}
                                 style={{ 
                                   width: '100%', 
@@ -662,7 +710,7 @@ const Summary = ({ formData }: SummaryProps) => {
         <Button 
           variant="contained" 
           onClick={handleGeneratePDF} 
-          disabled={isGeneratingPDF}
+          disabled={isGeneratingPDF || Object.keys(imagesBase64).length === 0 || !logoBase64}
           size="large"
           sx={{ 
             backgroundColor: '#1976d2',
@@ -675,7 +723,9 @@ const Summary = ({ formData }: SummaryProps) => {
             }
           }}
         >
-          {isGeneratingPDF ? '⏳ Gerando PDF...' : '📄 Baixar PDF'}
+          {isGeneratingPDF ? '⏳ Gerando PDF...' : 
+           Object.keys(imagesBase64).length === 0 || !logoBase64 ? '📄 Carregando imagens...' : 
+           '📄 Baixar PDF'}
         </Button>
       </Box>
     </>
