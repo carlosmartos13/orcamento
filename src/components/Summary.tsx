@@ -35,14 +35,17 @@ const Summary = ({ formData }: SummaryProps) => {
     window.open(`https://api.whatsapp.com/send?&text=${fullMessage}`, '_blank');
   };
 
-  // Pré-carrega todas as imagens
+  // Pré-carrega todas as imagens incluindo o logo
   useEffect(() => {
     const preloadImages = async () => {
-      const imagePromises = Object.values(equipmentImages).map((src) => {
+      const allImages = [...Object.values(equipmentImages), '/logo.png'];
+      
+      const imagePromises = allImages.map((src) => {
         return new Promise<void>((resolve) => {
           const img = new Image();
           img.onload = () => resolve();
           img.onerror = () => resolve(); // Resolve mesmo com erro para não travar
+          img.crossOrigin = 'anonymous';
           img.src = src;
         });
       });
@@ -113,13 +116,35 @@ const Summary = ({ formData }: SummaryProps) => {
       >
         <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
           {/* Header com Logo */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold' }}>
-              Orçamento  SEATEC | PDVLEGAL
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#666', mt: 1 }}>
-              Sistema de Gestão Empresarial
-            </Typography>
+          <Box sx={{ position: 'relative', textAlign: 'center', mb: 4 }}>
+            {/* Logo no canto direito */}
+            <Box sx={{ 
+              position: 'absolute', 
+              top: 0, 
+              right: 0,
+              zIndex: 1
+            }}>
+              <img 
+                src="/logo.png" 
+                alt="Logo SEATEC" 
+                crossOrigin="anonymous"
+                style={{ 
+                  height: '80px', 
+                  width: 'auto',
+                  objectFit: 'contain'
+                }} 
+              />
+            </Box>
+            
+            {/* Título centralizado */}
+            <Box sx={{ pr: 10 }}> {/* Padding right para não sobrepor o logo */}
+              <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold' }}>
+                Orçamento SEATEC | PDVLEGAL
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: '#666', mt: 1 }}>
+                Sistema de Gestão Empresarial
+              </Typography>
+            </Box>
           </Box>
 
           {/* Informações do Cliente */}
