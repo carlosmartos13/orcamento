@@ -1,11 +1,12 @@
 import { Box, Button, Grid, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from '@mui/material';
 import { FormData } from '../types';
-import { usePDF } from 'react-to-pdf';
 import { usePricing } from '../hooks/usePricing';
 import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage } from '../utils/calculations';
 import { formatCurrencyValue } from '../utils/formatCurrency';
 import { useState, useCallback, useEffect } from 'react';
 import { equipmentImages } from '../assets/images';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface SummaryProps {
   formData: FormData;
@@ -15,14 +16,6 @@ interface SummaryProps {
 const Summary = ({ formData }: SummaryProps) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(false);
-  
-  const { toPDF, targetRef } = usePDF({ 
-    filename: 'orcamento-seatec.pdf',
-    page: { 
-      margin: 20,
-      format: 'a4'
-    }
-  });
   
   const { pricing } = usePricing();
   
@@ -57,7 +50,7 @@ const Summary = ({ formData }: SummaryProps) => {
     preloadImages();
   }, []);
 
-  // Função para gerar PDF com aguardo das imagens
+  // Função para gerar PDF usando html2canvas + jsPDF
   const handleGeneratePDF = useCallback(async () => {
     setIsGeneratingPDF(true);
     try {
@@ -69,14 +62,54 @@ const Summary = ({ formData }: SummaryProps) => {
       // Aguarda um pouco mais para garantir renderização
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Gera o PDF
-      await toPDF();
+      // Seleciona o elemento a ser convertido
+      const element = document.getElementById('pdf-content');
+      if (!element) {
+        throw new Error('Elemento PDF não encontrado');
+      }
+
+      // Configurações do html2canvas
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: element.scrollWidth,
+        height: element.scrollHeight
+      });
+
+      // Criar PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Adicionar primeira página
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Adicionar páginas adicionais se necessário
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Salvar PDF
+      pdf.save('orcamento-seatec.pdf');
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Tente novamente.');
     } finally {
       setIsGeneratingPDF(false);
     }
-  }, [imagesLoaded, toPDF]);
+  }, [imagesLoaded]);
 
   // Função para criar linha da tabela
   const createTableRow = (name: string, description: string, price: number, quantity: number = 1, total?: number) => (
@@ -139,7 +172,7 @@ const Summary = ({ formData }: SummaryProps) => {
     <>
       {/* CONTEÚDO DO PDF */}
       <Box
-        ref={targetRef}
+        id="pdf-content"
         sx={{ 
           backgroundColor: '#ffffff', 
           padding: 4, 
@@ -435,138 +468,111 @@ const Summary = ({ formData }: SummaryProps) => {
             </Grid>
           </Paper>
 
-          {/* QUEBRA DE PÁGINA */}
-          <Box sx={{ pageBreakBefore: 'always', pt: 4 }}>
-            
-            {/* SEGUNDA PÁGINA - RESUMO IMPLANTAÇÃO */}
-            
-            {/* Header da segunda página */}
-            <PDFHeader />
+          {/* Conteúdo da Implantação */}
+          <Paper elevation={0} sx={{ p: 4, border: '1px solid #ddd', backgroundColor: '#fff', mt: 4 }}>
+            <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 4 }}>
+              RESUMO IMPLANTAÇÃO
+            </Typography>
 
-            {/* Informações do Cliente na segunda página */}
-            <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+            {/* Cardápio */}
+            <Box sx={{ mb: 4 }}>
               <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                📋 Informações do Cliente
+                📋 Cardápio
               </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: '#000' }}><strong>Nome:</strong> {formData.clientInfo.name}</Typography>
-                  <Typography sx={{ color: '#000' }}><strong>Empresa:</strong> {formData.clientInfo.companyName}</Typography>
-                  <Typography sx={{ color: '#000' }}><strong>CNPJ:</strong> {formData.clientInfo.cnpj}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: '#000' }}><strong>Telefone:</strong> {formData.clientInfo.phone}</Typography>
-                  <Typography sx={{ color: '#000' }}><strong>Email:</strong> {formData.clientInfo.email}</Typography>
-                </Grid>
-              </Grid>
-            </Paper>
-
-            {/* Conteúdo da Implantação */}
-            <Paper elevation={0} sx={{ p: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
-              <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 4 }}>
-                RESUMO IMPLANTAÇÃO
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                ☐ Importação de cardápio via planilha Excel
               </Typography>
+              <Typography sx={{ color: '#000', mb: 2 }}>
+                ☐ Cadastro de cardápio – Até 100 itens*
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
+                *Em caso de modificadores ou itens extras como: queijo, tomate, leite condensado e outros, cada modificador contará como item no cardápio.
+              </Typography>
+            </Box>
 
-              {/* Cardápio */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                  📋 Cardápio
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  ☐ Importação de cardápio via planilha Excel
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 2 }}>
-                  ☐ Cadastro de cardápio – Até 100 itens*
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
-                  *Em caso de modificadores ou itens extras como: queijo, tomate, leite condensado e outros, cada modificador contará como item no cardápio.
-                </Typography>
-              </Box>
+            {/* Dados Fiscais */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                🧾 Dados para emissão Fiscal
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                1. Enviar o comprovante de credenciamento no Estado para emissão de NFC-e;
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                2. Informar o CRT (Código de Regime Tributário);
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                3. Enviar o CSC (Código de Segurança do Contribuinte) com o devido ID;
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                4. Informar alíquotas de tributação que incidirão nos produtos (ICMS/ISS, CFOP, CST, PIS/COFINS);
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                5. Enviar o Certificado Digital A1 em arquivo PFX e senha;
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                6. Enviar o Token do IBPT - https://deolhonoimposto.ibpt.org.br/Site/PassoPasso
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                7. Planilha com descrição, grupo, preço de venda, NCM e CEST dos produtos.
+              </Typography>
+            </Box>
 
-              {/* Dados Fiscais */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                  🧾 Dados para emissão Fiscal
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  1. Enviar o comprovante de credenciamento no Estado para emissão de NFC-e;
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  2. Informar o CRT (Código de Regime Tributário);
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  3. Enviar o CSC (Código de Segurança do Contribuinte) com o devido ID;
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  4. Informar alíquotas de tributação que incidirão nos produtos (ICMS/ISS, CFOP, CST, PIS/COFINS);
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  5. Enviar o Certificado Digital A1 em arquivo PFX e senha;
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  6. Enviar o Token do IBPT - https://deolhonoimposto.ibpt.org.br/Site/PassoPasso
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  7. Planilha com descrição, grupo, preço de venda, NCM e CEST dos produtos.
-                </Typography>
-              </Box>
+            {/* Jornada do Cliente */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                🚀 Jornada do Cliente
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 2 }}>
+                Após o pagamento, faremos o faturamento de sua licença e, em até 1 dia útil um dos nossos Especialistas entrará em contato para conferência de dados e agendamento dos treinamentos.
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 2 }}>
+                Após a implantação, é só desfrutar de toda inovação e tecnologia que o PDV Legal levará para o seu negócio! 🤩
+              </Typography>
+              <Typography sx={{ color: '#000', fontWeight: 'bold' }}>
+                Importante! Lembre-se de contar comigo em qualquer momento de nossa parceria. 😀
+              </Typography>
+            </Box>
 
-              {/* Jornada do Cliente */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                  🚀 Jornada do Cliente
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 2 }}>
-                  Após o pagamento, faremos o faturamento de sua licença e, em até 1 dia útil um dos nossos Especialistas entrará em contato para conferência de dados e agendamento dos treinamentos.
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 2 }}>
-                  Após a implantação, é só desfrutar de toda inovação e tecnologia que o PDV Legal levará para o seu negócio! 🤩
-                </Typography>
-                <Typography sx={{ color: '#000', fontWeight: 'bold' }}>
-                  Importante! Lembre-se de contar comigo em qualquer momento de nossa parceria. 😀
-                </Typography>
-              </Box>
+            {/* Treinamento */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                💻 Treinamento
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 2 }}>
+                Para o treinamento é imprescindível o uso do computador ou notebook, além dos equipamentos sugeridos para infraestrutura em mãos.
+              </Typography>
+              <Typography sx={{ color: '#000' }}>
+                Nossos treinamentos são realizados de forma remota, via Google Meet. Mas não se preocupe, minutos antes de iniciar te enviaremos o link de acesso e qualquer dúvida nossos Especialistas estarão prontos para ajudar.
+              </Typography>
+            </Box>
 
-              {/* Treinamento */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                  💻 Treinamento
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 2 }}>
-                  Para o treinamento é imprescindível o uso do computador ou notebook, além dos equipamentos sugeridos para infraestrutura em mãos.
-                </Typography>
-                <Typography sx={{ color: '#000' }}>
-                  Nossos treinamentos são realizados de forma remota, via Google Meet. Mas não se preocupe, minutos antes de iniciar te enviaremos o link de acesso e qualquer dúvida nossos Especialistas estarão prontos para ajudar.
-                </Typography>
-              </Box>
+            {/* Horário e Atendimento */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                🕑 Horário e canais de atendimento
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                <strong>Telefone/WhatsApp:</strong> 11 4210-1779
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                <strong>E-mail:</strong> suporte@seatec.com.br
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                <strong>Suporte Emergencial:</strong> Segunda a Segunda: 8h às 23:59h
+              </Typography>
+              <Typography sx={{ color: '#000', mb: 1 }}>
+                <strong>Treinamentos e Dúvidas:</strong> Seg a Sexta: 9h às 18h
+              </Typography>
+            </Box>
 
-              {/* Horário e Atendimento */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                  🕑 Horário e canais de atendimento
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  <strong>Telefone/WhatsApp:</strong> 11 4210-1779
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  <strong>E-mail:</strong> suporte@seatec.com.br
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  <strong>Suporte Emergencial:</strong> Segunda a Segunda: 8h às 23:59h
-                </Typography>
-                <Typography sx={{ color: '#000', mb: 1 }}>
-                  <strong>Treinamentos e Dúvidas:</strong> Seg a Sexta: 9h às 18h
-                </Typography>
-              </Box>
-
-              {/* Mensagem Final */}
-              <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
-                <Typography variant="h6" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                  Agradecemos a confiança e desejamos que este seja o início de uma parceria de sucesso! 💙
-                </Typography>
-              </Box>
-            </Paper>
-          </Box>
+            {/* Mensagem Final */}
+            <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
+              <Typography variant="h6" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                Agradecemos a confiança e desejamos que este seja o início de uma parceria de sucesso! 💙
+              </Typography>
+            </Box>
+          </Paper>
         </Box>
       </Box>
 

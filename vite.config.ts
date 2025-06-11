@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   base: './', // Para funcionar em subdiretórios
@@ -9,15 +9,18 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false, // Remove sourcemaps para produção
-    minify: 'terser', // Minificação otimizada
+    minify: 'esbuild', // Usar esbuild ao invés de terser para melhor compatibilidade
+    target: 'es2015', // Compatibilidade com navegadores mais antigos
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          mui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled']
+          mui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          pdf: ['html2canvas', 'jspdf']
         }
       }
-    }
+    },
+    chunkSizeWarningLimit: 1000
   },
   server: {
     port: 5173,
@@ -26,5 +29,8 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: true
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@mui/material', '@emotion/react', '@emotion/styled']
   }
 })
