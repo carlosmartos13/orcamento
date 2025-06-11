@@ -52,7 +52,7 @@ const EquipmentStep = ({ formData, setFormData }: StepProps) => {
           </Grid>
           <Grid item>
             <TextField
-              value={value}
+              value={String(value)}
               onChange={(e) => handleEquipmentChange(field)(parseInt(e.target.value) || 0)}
               type="number"
               inputProps={{ min: 0, style: { textAlign: 'center', width: '60px' } }}
