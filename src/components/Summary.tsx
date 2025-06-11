@@ -10,7 +10,10 @@ interface SummaryProps {
 }
 
 const Summary = ({ formData }: SummaryProps) => {
-  const { toPDF, targetRef } = usePDF({ filename: 'orcamento-seatec.pdf' });
+  const { toPDF, targetRef } = usePDF({ 
+    filename: 'orcamento-seatec.pdf',
+    page: { margin: 20 }
+  });
   const { pricing } = usePricing();
   
   const monthlyTotal = calculateMonthlyTotal(formData, pricing);
@@ -26,20 +29,20 @@ const Summary = ({ formData }: SummaryProps) => {
   const createTableRow = (name: string, description: string, price: number, quantity: number = 1, total?: number) => (
     <TableRow key={name}>
       <TableCell>
-        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#000' }}>
           {name}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem', mt: 0.5 }}>
+        <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
           {description}
         </Typography>
       </TableCell>
-      <TableCell align="center">
+      <TableCell align="center" sx={{ color: '#000' }}>
         {quantity > 1 ? `${quantity}x` : '1x'}
       </TableCell>
-      <TableCell align="right">
+      <TableCell align="right" sx={{ color: '#000' }}>
         R$ {price.toFixed(2)}
       </TableCell>
-      <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>
         R$ {(total || price * quantity).toFixed(2)}
       </TableCell>
     </TableRow>
@@ -51,53 +54,55 @@ const Summary = ({ formData }: SummaryProps) => {
       <Box
         ref={targetRef}
         sx={{ 
-          backgroundColor: '#fff', 
+          backgroundColor: '#ffffff', 
           padding: 4, 
           fontFamily: 'Arial, sans-serif', 
-          color: '#000',
+          color: '#000000',
           minHeight: '100vh'
         }}
       >
         <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
           {/* Header com Logo */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <img src="/logo.png" alt="Logo SEATEC" style={{ height: 80, marginBottom: 16 }} />
             <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold' }}>
-              Orçamento Personalizado
+              Orçamento Personalizado - SEATEC
+            </Typography>
+            <Typography variant="subtitle1" sx={{ color: '#666', mt: 1 }}>
+              Sistema de Gestão Empresarial
             </Typography>
           </Box>
 
           {/* Informações do Cliente */}
-          <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
             <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
               📋 Informações do Cliente
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Typography><strong>Nome:</strong> {formData.clientInfo.name}</Typography>
-                <Typography><strong>Empresa:</strong> {formData.clientInfo.companyName}</Typography>
-                <Typography><strong>CNPJ:</strong> {formData.clientInfo.cnpj}</Typography>
+                <Typography sx={{ color: '#000' }}><strong>Nome:</strong> {formData.clientInfo.name}</Typography>
+                <Typography sx={{ color: '#000' }}><strong>Empresa:</strong> {formData.clientInfo.companyName}</Typography>
+                <Typography sx={{ color: '#000' }}><strong>CNPJ:</strong> {formData.clientInfo.cnpj}</Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography><strong>Telefone:</strong> {formData.clientInfo.phone}</Typography>
-                <Typography><strong>Email:</strong> {formData.clientInfo.email}</Typography>
+                <Typography sx={{ color: '#000' }}><strong>Telefone:</strong> {formData.clientInfo.phone}</Typography>
+                <Typography sx={{ color: '#000' }}><strong>Email:</strong> {formData.clientInfo.email}</Typography>
               </Grid>
             </Grid>
           </Paper>
 
           {/* Mensalidade */}
-          <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
             <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
               💰 Assinatura Mensal
             </Typography>
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Módulo / Descrição</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qtd</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Valor Unit.</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                    <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Módulo / Descrição</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold', color: '#000' }}>Qtd</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Valor Unit.</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Total</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -136,8 +141,8 @@ const Summary = ({ formData }: SummaryProps) => {
                   )}
                   
                   {/* Total da Mensalidade */}
-                  <TableRow sx={{ backgroundColor: '#e3f2fd' }}>
-                    <TableCell colSpan={3} sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  <TableRow sx={{ backgroundColor: '#e8f4fd' }}>
+                    <TableCell colSpan={3} sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#000' }}>
                       TOTAL MENSALIDADE
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#1976d2' }}>
@@ -153,18 +158,18 @@ const Summary = ({ formData }: SummaryProps) => {
           {(formData.additionals.legalLoyalty || 
             formData.additionals.delivery !== 'none' || 
             formData.additionals.selfServiceTerminals > 0) && (
-            <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
               <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
                 📦 Módulos Adicionais
               </Typography>
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Adicional / Descrição</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qtd</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Valor Unit.</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                    <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                      <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Adicional / Descrição</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 'bold', color: '#000' }}>Qtd</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Valor Unit.</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Total</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -200,18 +205,18 @@ const Summary = ({ formData }: SummaryProps) => {
 
           {/* Equipamentos */}
           {equipmentTotal > 0 && (
-            <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
               <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
                 🛠️ Equipamentos
               </Typography>
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Equipamento / Descrição</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qtd</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Valor Unit.</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                    <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                      <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Equipamento / Descrição</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 'bold', color: '#000' }}>Qtd</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Valor Unit.</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Total</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -231,8 +236,8 @@ const Summary = ({ formData }: SummaryProps) => {
                     })}
                     
                     {/* Total dos Equipamentos */}
-                    <TableRow sx={{ backgroundColor: '#fff3e0' }}>
-                      <TableCell colSpan={3} sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                    <TableRow sx={{ backgroundColor: '#fff8e1' }}>
+                      <TableCell colSpan={3} sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#000' }}>
                         TOTAL EQUIPAMENTOS
                       </TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#f57c00' }}>
@@ -243,29 +248,27 @@ const Summary = ({ formData }: SummaryProps) => {
                 </Table>
               </TableContainer>
 
-              {/* Galeria de Imagens dos Equipamentos */}
+              {/* Lista de Equipamentos Selecionados (sem imagens para PDF) */}
               <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#000' }}>
                   Equipamentos Selecionados:
                 </Typography>
                 <Grid container spacing={2}>
                   {Object.entries(formData.equipment).map(([key, quantity]) => {
                     if (quantity > 0) {
                       const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                      if (equipmentItem && equipmentItem.image) {
+                      if (equipmentItem) {
                         return (
                           <Grid item xs={6} sm={4} md={3} key={key}>
-                            <Box sx={{ textAlign: 'center', p: 1, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                              <img 
-                                src={equipmentItem.image} 
-                                alt={equipmentItem.name} 
-                                style={{ width: '100%', maxWidth: 120, height: 'auto', marginBottom: 8 }} 
-                              />
-                              <Typography variant="caption" display="block">
+                            <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, backgroundColor: '#fafafa' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1 }}>
                                 {equipmentItem.name}
                               </Typography>
-                              <Typography variant="caption" color="primary" sx={{ fontWeight: 'bold' }}>
-                                Qtd: {quantity}
+                              <Typography variant="caption" sx={{ color: '#666' }}>
+                                Quantidade: {quantity}
+                              </Typography>
+                              <Typography variant="caption" display="block" sx={{ color: '#666' }}>
+                                Valor: R$ {equipmentItem.price.toFixed(2)}
                               </Typography>
                             </Box>
                           </Grid>
@@ -280,13 +283,13 @@ const Summary = ({ formData }: SummaryProps) => {
           )}
 
           {/* Resumo Final */}
-          <Paper elevation={3} sx={{ p: 4, backgroundColor: '#f8f9fa' }}>
+          <Paper elevation={0} sx={{ p: 4, backgroundColor: '#f8f9fa', border: '1px solid #ddd' }}>
             <Typography variant="h5" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
               💳 Resumo Financeiro
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e3f2fd', borderRadius: 2 }}>
+                <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e8f4fd', borderRadius: 2, border: '1px solid #ccc' }}>
                   <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
                     Mensalidade
                   </Typography>
@@ -297,7 +300,7 @@ const Summary = ({ formData }: SummaryProps) => {
               </Grid>
               {equipmentTotal > 0 && (
                 <Grid item xs={12} sm={6}>
-                  <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#fff3e0', borderRadius: 2 }}>
+                  <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#fff8e1', borderRadius: 2, border: '1px solid #ccc' }}>
                     <Typography variant="h6" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
                       Equipamentos (Único)
                     </Typography>
@@ -308,15 +311,15 @@ const Summary = ({ formData }: SummaryProps) => {
                 </Grid>
               )}
               <Grid item xs={12}>
-                <Divider sx={{ my: 2 }} />
-                <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2 }}>
+                <Divider sx={{ my: 2, borderColor: '#ccc' }} />
+                <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
                   <Typography variant="h5" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
                     INVESTIMENTO TOTAL
                   </Typography>
                   <Typography variant="h3" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
                     R$ {(monthlyTotal + equipmentTotal).toFixed(2)}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ mt: 1, color: '#555' }}>
                     {equipmentTotal > 0 ? `Mensalidade: R$ ${monthlyTotal.toFixed(2)} + Equipamentos: R$ ${equipmentTotal.toFixed(2)}` : 'Valor mensal'}
                   </Typography>
                 </Box>
@@ -333,13 +336,13 @@ const Summary = ({ formData }: SummaryProps) => {
           onClick={handleWhatsApp} 
           size="large"
           sx={{ 
-            background: 'linear-gradient(45deg, #25D366 30%, #128C7E 90%)', 
+            backgroundColor: '#25D366',
             color: '#fff',
             px: 4,
             py: 1.5,
             fontSize: '1.1rem',
             '&:hover': {
-              background: 'linear-gradient(45deg, #128C7E 30%, #25D366 90%)',
+              backgroundColor: '#128C7E',
             }
           }}
         >
@@ -350,13 +353,13 @@ const Summary = ({ formData }: SummaryProps) => {
           onClick={() => toPDF()} 
           size="large"
           sx={{ 
-            background: 'linear-gradient(45deg, #0a1957 30%, #1f2f91 90%)', 
+            backgroundColor: '#1976d2',
             color: '#fff',
             px: 4,
             py: 1.5,
             fontSize: '1.1rem',
             '&:hover': {
-              background: 'linear-gradient(45deg, #1f2f91 30%, #0a1957 90%)',
+              backgroundColor: '#1565c0',
             }
           }}
         >
