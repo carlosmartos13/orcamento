@@ -90,7 +90,7 @@ export const generateWhatsAppMessage = (
     if (quantity > 0) {
       const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
       if (equipmentItem) {
-        messageLines.push(`• ${equipmentItem.name}: ${quantity} x R$ ${equipmentItem.price.toFixed(2)} = R$ ${(quantity * equipmentItem.price).toFixed(2)}`);
+        messageLines.push(`✅ ${quantity} ${equipmentItem.name}:  R$ ${equipmentItem.price.toFixed(2)} = R$ ${(quantity * equipmentItem.price).toFixed(2)}`);
       }
     }
   });
