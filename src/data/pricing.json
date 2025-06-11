@@ -45,7 +45,7 @@
     "deliveryPlus": {
       "name": "Delivery Legal Plus",
       "price": 299.90,
-      "description": "Sistema de delivery para faturamento acima de 25k"
+      "description": "Sistema de delivery para faturamento acima de 25k por mes"
     },
     "selfServiceTerminal": {
       "name": "Terminal Auto Atendimento",
