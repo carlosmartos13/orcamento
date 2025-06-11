@@ -2,6 +2,7 @@ import { FormControlLabel, Checkbox, Grid, Typography, IconButton, RadioGroup, R
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { FormData } from '../../types';
+import { usePricing } from '../../hooks/usePricing';
 
 interface StepProps {
   formData: FormData;
@@ -9,6 +10,8 @@ interface StepProps {
 }
 
 const AdditionalsStep = ({ formData, setFormData }: StepProps) => {
+  const { pricing } = usePricing();
+
   const handleLoyaltyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -50,7 +53,7 @@ const AdditionalsStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleLoyaltyChange}
             />
           }
-          label="Fidelidade Legal (R$ 230,00)"
+          label={`${pricing.additionals.legalLoyalty.name} (R$ ${pricing.additionals.legalLoyalty.price.toFixed(2)})`}
         />
       </Grid>
       
@@ -70,12 +73,12 @@ const AdditionalsStep = ({ formData, setFormData }: StepProps) => {
           <FormControlLabel
             value="basic"
             control={<Radio />}
-            label="Faturamento até 25k (R$ 199,00)"
+            label={`${pricing.additionals.deliveryBasic.name} (R$ ${pricing.additionals.deliveryBasic.price.toFixed(2)})`}
           />
           <FormControlLabel
             value="plus"
             control={<Radio />}
-            label="Faturamento acima de 25k (R$ 299,90)"
+            label={`${pricing.additionals.deliveryPlus.name} (R$ ${pricing.additionals.deliveryPlus.price.toFixed(2)})`}
           />
         </RadioGroup>
       </Grid>
@@ -83,7 +86,9 @@ const AdditionalsStep = ({ formData, setFormData }: StepProps) => {
       <Grid item xs={12}>
         <Grid container alignItems="center" spacing={2}>
           <Grid item>
-            <Typography variant="subtitle1">Terminal Auto Atendimento (R$ 150,00 cada)</Typography>
+            <Typography variant="subtitle1">
+              {pricing.additionals.selfServiceTerminal.name} (R$ {pricing.additionals.selfServiceTerminal.price.toFixed(2)} cada)
+            </Typography>
           </Grid>
           <Grid item>
             <IconButton 

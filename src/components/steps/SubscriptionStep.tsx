@@ -2,6 +2,7 @@ import { FormControlLabel, Checkbox, Grid, Typography, IconButton } from '@mui/m
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { FormData } from '../../types';
+import { usePricing } from '../../hooks/usePricing';
 
 interface StepProps {
   formData: FormData;
@@ -9,6 +10,8 @@ interface StepProps {
 }
 
 const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
+  const { pricing } = usePricing();
+
   const handleCheckboxChange = (field: keyof FormData['subscription']) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -38,10 +41,10 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
             <Checkbox
               checked={formData.subscription.cloud}
               onChange={handleCheckboxChange('cloud')}
-              disabled
+              disabled={pricing.modules.cloud.required}
             />
           }
-          label="Cloud (R$ 64,10) - Obrigatório"
+          label={`${pricing.modules.cloud.name} (R$ ${pricing.modules.cloud.price.toFixed(2)}) - Obrigatório`}
         />
       </Grid>
       <Grid item xs={12}>
@@ -52,7 +55,7 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleCheckboxChange('fiscal')}
             />
           }
-          label="Fiscal (R$ 73,00)"
+          label={`${pricing.modules.fiscal.name} (R$ ${pricing.modules.fiscal.price.toFixed(2)})`}
         />
       </Grid>
       <Grid item xs={12}>
@@ -63,7 +66,7 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleCheckboxChange('inventory')}
             />
           }
-          label="Estoque (R$ 73,00)"
+          label={`${pricing.modules.inventory.name} (R$ ${pricing.modules.inventory.price.toFixed(2)})`}
         />
       </Grid>
       <Grid item xs={12}>
@@ -74,13 +77,15 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleCheckboxChange('financial')}
             />
           }
-          label="Financeiro (R$ 73,00)"
+          label={`${pricing.modules.financial.name} (R$ ${pricing.modules.financial.price.toFixed(2)})`}
         />
       </Grid>
       <Grid item xs={12}>
         <Grid container alignItems="center" spacing={2}>
           <Grid item>
-            <Typography variant="subtitle1">PDV (R$ 15,00 cada)</Typography>
+            <Typography variant="subtitle1">
+              {pricing.modules.pdv.name} (R$ {pricing.modules.pdv.price.toFixed(2)} cada)
+            </Typography>
           </Grid>
           <Grid item>
             <IconButton 
