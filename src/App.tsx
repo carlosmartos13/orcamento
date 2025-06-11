@@ -31,6 +31,11 @@ const initialFormData: FormData = {
     selfServiceTotemGertec: 0,
     networkKit: 0,
     raspberryServer: 0,
+    elginM10Pro: 0,
+    tancaTp650: 0,
+    impressoraFiscal: 0,
+    leitorCodigoBarras: 0,
+    gaveta: 0,
   },
 };
 

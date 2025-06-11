@@ -11,8 +11,11 @@ export const equipmentImages = {
   selfServiceTotemGertec: totem,
   networkKit: rede,
   raspberryServer: raspberryServer,
-  'Elgin M10 Pro': raspberryServer, // Usando a mesma imagem temporariamente
-  'Tanca tp-650': raspberryServer, // Usando a mesma imagem temporariamente
+  elginM10Pro: raspberryServer, // Usando a mesma imagem temporariamente
+  tancaTp650: raspberryServer, // Usando a mesma imagem temporariamente
+  impressoraFiscal: raspberryServer, // Usando a mesma imagem temporariamente
+  leitorCodigoBarras: raspberryServer, // Usando a mesma imagem temporariamente
+  gaveta: raspberryServer, // Usando a mesma imagem temporariamente
 };
 
 export default equipmentImages;

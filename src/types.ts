@@ -26,6 +26,11 @@ export interface Equipment {
   selfServiceTotemGertec: number;
   networkKit: number;
   raspberryServer: number;
+  elginM10Pro: number;
+  tancaTp650: number;
+  impressoraFiscal: number;
+  leitorCodigoBarras: number;
+  gaveta: number;
 }
 
 export interface FormData {

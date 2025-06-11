@@ -79,15 +79,30 @@
       "price": 1390.00,
       "description": "Servidor local Raspberry Pi"
     },
-    "Elgin M10 Pro": {
+    "elginM10Pro": {
       "name": "Mini PDV Android Elgin M10 Pro",
       "price": 1390.00,
       "description": "Mini PDV ANDROID Elgin"
     },
-    "Tanca tp-650": {
+    "tancaTp650": {
       "name": "Impressora Tanca TP-650",
       "price": 1390.00,
       "description": "Impressora Termica"
+    },
+    "impressoraFiscal": {
+      "name": "Impressora Fiscal Epson TM-T20X",
+      "price": 890.00,
+      "description": "Impressora fiscal térmica não fiscal"
+    },
+    "leitorCodigoBarras": {
+      "name": "Leitor Código de Barras Honeywell",
+      "price": 320.00,
+      "description": "Leitor de código de barras com fio"
+    },
+    "gaveta": {
+      "name": "Gaveta de Dinheiro Menno",
+      "price": 180.00,
+      "description": "Gaveta de dinheiro com 5 compartimentos"
     }
   }
 }
