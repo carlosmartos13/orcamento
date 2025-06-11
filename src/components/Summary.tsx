@@ -115,7 +115,7 @@ const Summary = ({ formData }: SummaryProps) => {
           {/* Header com Logo */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold' }}>
-              Orçamento Personalizado - SEATEC
+              Orçamento  SEATEC | PDVLEGAL
             </Typography>
             <Typography variant="subtitle1" sx={{ color: '#666', mt: 1 }}>
               Sistema de Gestão Empresarial
