@@ -6,6 +6,7 @@ import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage
 import { formatCurrencyValue } from '../utils/formatCurrency';
 import { useState, useCallback, useEffect } from 'react';
 import { equipmentImages } from '../assets/images';
+import logo from '../public/logo.png'
 
 interface SummaryProps {
   formData: FormData;
