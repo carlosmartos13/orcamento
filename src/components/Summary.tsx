@@ -1,10 +1,18 @@
 import { Box, Button, Grid, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from '@mui/material';
 import { FormData } from '../types';
-import { usePDF } from 'react-to-pdf';
 import { usePricing } from '../hooks/usePricing';
 import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage } from '../utils/calculations';
 import { formatCurrencyValue } from '../utils/formatCurrency';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
+// Importações diretas das imagens
+import gs300 from '../assets/gs300.png';
+import d2 from '../assets/d2.jpg';
+import totem from '../assets/totem.png';
+import rede from '../assets/rede.png';
+import raspberryServer from '../assets/raspberryServer.jpeg';
 
 interface SummaryProps {
   formData: FormData;
@@ -13,15 +21,11 @@ interface SummaryProps {
 
 const Summary = ({ formData }: SummaryProps) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
   
-  const { toPDF, targetRef } = usePDF({ 
-    filename: 'orcamento-seatec.pdf',
-    page: { 
-      margin: 20,
-      format: 'a4'
-    }
-  });
+  const page1Ref = useRef<HTMLDivElement>(null);
+  const page2Ref = useRef<HTMLDivElement>(null);
+  const page3Ref = useRef<HTMLDivElement>(null);
+  const page4Ref = useRef<HTMLDivElement>(null);
   
   const { pricing } = usePricing();
   
@@ -34,76 +38,76 @@ const Summary = ({ formData }: SummaryProps) => {
     window.open(`https://api.whatsapp.com/send?&text=${fullMessage}`, '_blank');
   };
 
-  // Importações diretas das imagens
+  // Mapeamento das imagens
   const equipmentImages = {
-    androidPdvGertec: '/src/assets/gs300.png',
-    androidPdvSunmi: '/src/assets/d2.jpg',
-    selfServiceTotemGertec: '/src/assets/totem.png',
-    networkKit: '/src/assets/rede.png',
-    raspberryServer: '/src/assets/raspberryServer.jpeg',
-    'Elgin M10 Pro': '/src/assets/raspberryServer.jpeg',
-    'Tanca tp-650': '/src/assets/raspberryServer.jpeg',
+    androidPdvGertec: gs300,
+    androidPdvSunmi: d2,
+    selfServiceTotemGertec: totem,
+    networkKit: rede,
+    raspberryServer: raspberryServer,
+    'Elgin M10 Pro': raspberryServer,
+    'Tanca tp-650': raspberryServer,
   };
 
-  // Pré-carrega todas as imagens
-  useEffect(() => {
-    const preloadImages = async () => {
-      const allImages = [
-        ...Object.values(equipmentImages),
-        '/logo.png'
-      ];
-      
-      const imagePromises = allImages.map((src) => {
-        return new Promise<void>((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => {
-            console.log(`Imagem carregada: ${src}`);
-            resolve();
-          };
-          img.onerror = (error) => {
-            console.error(`Erro ao carregar imagem: ${src}`, error);
-            resolve(); // Resolve mesmo com erro para não travar
-          };
-          img.src = src;
-        });
-      });
-
-      try {
-        await Promise.all(imagePromises);
-        console.log('Todas as imagens foram carregadas');
-        setImagesLoaded(true);
-      } catch (error) {
-        console.error('Erro no carregamento das imagens:', error);
-        setImagesLoaded(true); // Define como true mesmo com erro
-      }
-    };
-
-    preloadImages();
-  }, []);
-
-  // Função para gerar PDF com aguardo das imagens
+  // Função para gerar PDF com múltiplas páginas
   const handleGeneratePDF = useCallback(async () => {
     setIsGeneratingPDF(true);
+    
     try {
-      // Aguarda as imagens serem carregadas
-      if (!imagesLoaded) {
-        console.log('Aguardando carregamento das imagens...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      
+      // Função para capturar e adicionar página
+      const addPageToPDF = async (elementRef: React.RefObject<HTMLDivElement>, isFirstPage = false) => {
+        if (!elementRef.current) return;
+        
+        const canvas = await html2canvas(elementRef.current, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: elementRef.current.scrollWidth,
+          height: elementRef.current.scrollHeight,
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+        
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      };
+
+      // Adicionar páginas sequencialmente
+      if (page1Ref.current) {
+        await addPageToPDF(page1Ref, true);
       }
       
-      // Aguarda um pouco mais para garantir renderização
-      console.log('Aguardando renderização final...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (equipmentTotal > 0 && page2Ref.current) {
+        await addPageToPDF(page2Ref);
+      }
       
-      console.log('Gerando PDF...');
-      await toPDF();
-      console.log('PDF gerado com sucesso!');
+      if (page3Ref.current) {
+        await addPageToPDF(page3Ref);
+      }
+      
+      if (page4Ref.current) {
+        await addPageToPDF(page4Ref);
+      }
+
+      // Salvar o PDF
+      pdf.save('orcamento-seatec.pdf');
+      
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
     } finally {
       setIsGeneratingPDF(false);
     }
-  }, [imagesLoaded, toPDF]);
+  }, [equipmentTotal]);
 
   // Função para criar linha da tabela
   const createTableRow = (name: string, description: string, price: number, quantity: number = 1, total?: number) => (
@@ -205,22 +209,21 @@ const Summary = ({ formData }: SummaryProps) => {
       </Box>
 
       {/* CONTEÚDO DO PDF - OCULTO NA TELA */}
-      <Box
-        ref={targetRef}
-        sx={{ 
-          position: 'absolute',
-          left: '-9999px',
-          top: '-9999px',
-          backgroundColor: '#ffffff', 
-          padding: 4, 
-          fontFamily: 'Arial, sans-serif', 
-          color: '#000000',
-          width: '210mm',
-          minHeight: '297mm'
-        }}
-      >
+      <Box sx={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+        
         {/* PÁGINA 1 - MENSALIDADE */}
-        <Box sx={{ minHeight: '297mm', pageBreakAfter: 'always' }}>
+        <Box 
+          ref={page1Ref}
+          sx={{ 
+            width: '210mm',
+            minHeight: '297mm',
+            backgroundColor: '#ffffff', 
+            padding: '20mm', 
+            fontFamily: 'Arial, sans-serif', 
+            color: '#000000',
+            boxSizing: 'border-box'
+          }}
+        >
           <PDFHeader />
           <ClientInfo />
 
@@ -334,7 +337,18 @@ const Summary = ({ formData }: SummaryProps) => {
 
         {/* PÁGINA 2 - EQUIPAMENTOS */}
         {equipmentTotal > 0 && (
-          <Box sx={{ minHeight: '297mm', pageBreakAfter: 'always' }}>
+          <Box 
+            ref={page2Ref}
+            sx={{ 
+              width: '210mm',
+              minHeight: '297mm',
+              backgroundColor: '#ffffff', 
+              padding: '20mm', 
+              fontFamily: 'Arial, sans-serif', 
+              color: '#000000',
+              boxSizing: 'border-box'
+            }}
+          >
             <PDFHeader />
             <ClientInfo />
 
@@ -443,7 +457,18 @@ const Summary = ({ formData }: SummaryProps) => {
         )}
 
         {/* PÁGINA 3 - RESUMO FINANCEIRO */}
-        <Box sx={{ minHeight: '297mm', pageBreakAfter: 'always' }}>
+        <Box 
+          ref={page3Ref}
+          sx={{ 
+            width: '210mm',
+            minHeight: '297mm',
+            backgroundColor: '#ffffff', 
+            padding: '20mm', 
+            fontFamily: 'Arial, sans-serif', 
+            color: '#000000',
+            boxSizing: 'border-box'
+          }}
+        >
           <PDFHeader />
           <ClientInfo />
 
@@ -493,7 +518,18 @@ const Summary = ({ formData }: SummaryProps) => {
         </Box>
 
         {/* PÁGINA 4 - RESUMO IMPLANTAÇÃO */}
-        <Box sx={{ minHeight: '297mm' }}>
+        <Box 
+          ref={page4Ref}
+          sx={{ 
+            width: '210mm',
+            minHeight: '297mm',
+            backgroundColor: '#ffffff', 
+            padding: '20mm', 
+            fontFamily: 'Arial, sans-serif', 
+            color: '#000000',
+            boxSizing: 'border-box'
+          }}
+        >
           <PDFHeader />
           <ClientInfo />
 
