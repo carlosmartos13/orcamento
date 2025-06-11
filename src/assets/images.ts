@@ -4,10 +4,6 @@ import d2 from './d2.jpg';
 import totem from './totem.png';
 import rede from './rede.png';
 import raspberryServer from './raspberryServer.jpeg';
-import tanca650 from './tanca650.png';
-import elgini9 from './elgini9.png';
-import m10pro from './m10pro.png';
-
 
 export const equipmentImages = {
   androidPdvGertec: gs300,
@@ -15,11 +11,11 @@ export const equipmentImages = {
   selfServiceTotemGertec: totem,
   networkKit: rede,
   raspberryServer: raspberryServer,
-  elginM10Pro: m10pro, // Usando a mesma imagem temporariamente
-  tancaTp650: tanca650, // Usando a mesma imagem temporariamente
-  impressoraFiscal: raspberryServer, // Usando a mesma imagem temporariamente
-  leitorCodigoBarras: raspberryServer, // Usando a mesma imagem temporariamente
-  gaveta: gaveta, // Usando a mesma imagem temporariamente
+  elginM10Pro: raspberryServer, // Usando imagem existente como placeholder
+  tancaTp650: raspberryServer, // Usando imagem existente como placeholder
+  impressoraFiscal: raspberryServer, // Usando imagem existente como placeholder
+  leitorCodigoBarras: raspberryServer, // Usando imagem existente como placeholder
+  gaveta: raspberryServer, // Usando imagem existente como placeholder
 };
 
 export default equipmentImages;
