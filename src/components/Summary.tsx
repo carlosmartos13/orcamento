@@ -4,6 +4,7 @@ import { usePDF } from 'react-to-pdf';
 import { usePricing } from '../hooks/usePricing';
 import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage } from '../utils/calculations';
 import { useState, useCallback } from 'react';
+import { equipmentImages } from '../assets/images';
 
 interface SummaryProps {
   formData: FormData;
@@ -47,11 +48,11 @@ const Summary = ({ formData }: SummaryProps) => {
       };
 
       images.forEach((img) => {
-        if (img.complete) {
+        if (img.complete && img.naturalHeight !== 0) {
           checkAllLoaded();
         } else {
           img.onload = checkAllLoaded;
-          img.onerror = checkAllLoaded; // Conta também imagens com erro
+          img.onerror = checkAllLoaded;
         }
       });
     });
@@ -64,7 +65,7 @@ const Summary = ({ formData }: SummaryProps) => {
       // Aguarda o carregamento de todas as imagens
       await waitForImages();
       // Aguarda um pouco mais para garantir que tudo foi renderizado
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       // Gera o PDF
       await toPDF();
     } catch (error) {
@@ -306,7 +307,9 @@ const Summary = ({ formData }: SummaryProps) => {
                   {Object.entries(formData.equipment).map(([key, quantity]) => {
                     if (quantity > 0) {
                       const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                      if (equipmentItem && equipmentItem.image) {
+                      const imageUrl = equipmentImages[key as keyof typeof equipmentImages];
+                      
+                      if (equipmentItem && imageUrl) {
                         return (
                           <Grid item xs={6} sm={4} md={3} key={key}>
                             <Box sx={{ 
@@ -322,9 +325,8 @@ const Summary = ({ formData }: SummaryProps) => {
                               justifyContent: 'center'
                             }}>
                               <img 
-                                src={equipmentItem.image} 
+                                src={imageUrl} 
                                 alt={equipmentItem.name}
-                                crossOrigin="anonymous"
                                 style={{ 
                                   width: '100%', 
                                   maxWidth: '120px', 
@@ -338,15 +340,15 @@ const Summary = ({ formData }: SummaryProps) => {
                                   backgroundColor: '#fff'
                                 }} 
                                 onLoad={(e) => {
-                                  // Marca a imagem como carregada
                                   const target = e.target as HTMLImageElement;
                                   target.setAttribute('data-loaded', 'true');
+                                  console.log(`Imagem carregada: ${equipmentItem.name}`);
                                 }}
                                 onError={(e) => {
-                                  // Fallback caso a imagem não carregue
                                   const target = e.target as HTMLImageElement;
                                   target.style.display = 'none';
                                   target.setAttribute('data-loaded', 'true');
+                                  console.error(`Erro ao carregar imagem: ${equipmentItem.name}`);
                                 }}
                               />
                               <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>

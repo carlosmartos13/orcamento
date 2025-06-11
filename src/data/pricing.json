@@ -57,43 +57,36 @@
     "androidPdvGertec": {
       "name": "PDV Android Gertec GS300",
       "price": 2400.00,
-      "image": "/src/assets/gs300.png",
       "description": "PDV Android completo da Gertec"
     },
     "androidPdvSunmi": {
       "name": "PDV Android Sunmi D2",
       "price": 2350.00,
-      "image": "/src/assets/d2.jpg",
       "description": "PDV Android compacto da Sunmi"
     },
     "selfServiceTotemGertec": {
       "name": "Totem Auto Atendimento Gertec",
       "price": 3890.00,
-      "image": "/src/assets/totem.png",
       "description": "Totem completo para auto atendimento"
     },
     "networkKit": {
       "name": "Kit Rede (Roteador + Switch)",
       "price": 550.00,
-      "image": "/src/assets/rede.png",
       "description": "Kit completo de rede"
     },
     "raspberryServer": {
       "name": "Servidor Raspberry Pi",
       "price": 1390.00,
-      "image": "/src/assets/raspberryServer.jpeg",
       "description": "Servidor local Raspberry Pi"
     },
     "Elgin M10 Pro": {
       "name": "Mini PDV Android Elgin M10 Pro",
       "price": 1390.00,
-      "image": "/src/assets/raspberryServer.jpeg",
       "description": "Mini PDV ANDROID Elgin"
     },
     "Tanca tp-650": {
       "name": "Impressora Tanca TP-650",
       "price": 1390.00,
-      "image": "/src/assets/raspberryServer.jpeg",
       "description": "Impressora Termica"
     }
   }
