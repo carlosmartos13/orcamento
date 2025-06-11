@@ -6,7 +6,6 @@ import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage
 import { formatCurrencyValue } from '../utils/formatCurrency';
 import { useState, useCallback, useEffect } from 'react';
 import { equipmentImages } from '../assets/images';
-import logo from '../public/logo.png'
 
 interface SummaryProps {
   formData: FormData;
@@ -39,7 +38,7 @@ const Summary = ({ formData }: SummaryProps) => {
   // Pré-carrega todas as imagens incluindo o logo
   useEffect(() => {
     const preloadImages = async () => {
-      const allImages = [...Object.values(equipmentImages), '/logo.png'];
+      const allImages = [...Object.values(equipmentImages), './logo.png'];
       
       const imagePromises = allImages.map((src) => {
         return new Promise<void>((resolve) => {
@@ -102,6 +101,40 @@ const Summary = ({ formData }: SummaryProps) => {
     </TableRow>
   );
 
+  // Componente do Header reutilizável
+  const PDFHeader = () => (
+    <Box sx={{ position: 'relative', textAlign: 'center', mb: 4 }}>
+      {/* Logo no canto direito */}
+      <Box sx={{ 
+        position: 'absolute', 
+        top: 0, 
+        right: 0,
+        zIndex: 1
+      }}>
+        <img 
+          src="./logo.png" 
+          alt="Logo SEATEC" 
+          crossOrigin="anonymous"
+          style={{ 
+            height: '80px', 
+            width: 'auto',
+            objectFit: 'contain'
+          }} 
+        />
+      </Box>
+      
+      {/* Título centralizado */}
+      <Box sx={{ pr: 10 }}> {/* Padding right para não sobrepor o logo */}
+        <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold' }}>
+          Orçamento SEATEC | PDVLEGAL
+        </Typography>
+        <Typography variant="subtitle1" sx={{ color: '#666', mt: 1 }}>
+          Sistema de Gestão Empresarial
+        </Typography>
+      </Box>
+    </Box>
+  );
+
   return (
     <>
       {/* CONTEÚDO DO PDF */}
@@ -116,37 +149,10 @@ const Summary = ({ formData }: SummaryProps) => {
         }}
       >
         <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
+          {/* PRIMEIRA PÁGINA */}
+          
           {/* Header com Logo */}
-          <Box sx={{ position: 'relative', textAlign: 'center', mb: 4 }}>
-            {/* Logo no canto direito */}
-            <Box sx={{ 
-              position: 'absolute', 
-              top: 0, 
-              right: 0,
-              zIndex: 1
-            }}>
-              <img 
-                src="/logo.png" 
-                alt="Logo SEATEC" 
-                crossOrigin="anonymous"
-                style={{ 
-                  height: '80px', 
-                  width: 'auto',
-                  objectFit: 'contain'
-                }} 
-              />
-            </Box>
-            
-            {/* Título centralizado */}
-            <Box sx={{ pr: 10 }}> {/* Padding right para não sobrepor o logo */}
-              <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold' }}>
-                Orçamento SEATEC | PDVLEGAL
-              </Typography>
-              <Typography variant="subtitle1" sx={{ color: '#666', mt: 1 }}>
-                Sistema de Gestão Empresarial
-              </Typography>
-            </Box>
-          </Box>
+          <PDFHeader />
 
           {/* Informações do Cliente */}
           <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
@@ -208,23 +214,13 @@ const Summary = ({ formData }: SummaryProps) => {
                     pricing.modules.financial.price
                   )}
                   
-                  {/* PDVs */}
+                  {/* PDVs Adicionais (apenas se houver mais de 1) */}
                   {formData.subscription.pdvCount > 1 && createTableRow(
                     pricing.modules.pdv.name + ' Adicional',
                     pricing.modules.pdv.description,
                     pricing.modules.pdv.price,
                     formData.subscription.pdvCount - 1
                   )}
-                  
-                  {/* Total da Mensalidade */}
-                  <TableRow sx={{ backgroundColor: '#e8f4fd' }}>
-                    <TableCell colSpan={3} sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#000' }}>
-                      TOTAL MENSALIDADE
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#1976d2' }}>
-                      R$ {formatCurrencyValue(monthlyTotal)}
-                    </TableCell>
-                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
@@ -279,113 +275,119 @@ const Summary = ({ formData }: SummaryProps) => {
             </Paper>
           )}
 
+          {/* TOTAL MENSALIDADE */}
+          <Paper elevation={0} sx={{ p: 3, mb: 4, backgroundColor: '#e8f4fd', border: '2px solid #1976d2' }}>
+            <Typography variant="h5" sx={{ color: '#1976d2', fontWeight: 'bold', textAlign: 'center' }}>
+              💰 TOTAL MENSALIDADE: R$ {formatCurrencyValue(monthlyTotal)}
+            </Typography>
+          </Paper>
+
           {/* Equipamentos */}
           {equipmentTotal > 0 && (
-            <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
-              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                🛠️ Equipamentos
-              </Typography>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                      <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Equipamento / Descrição</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold', color: '#000' }}>Qtd</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Valor Unit.</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Total</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
+            <>
+              <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🛠️ Equipamentos
+                </Typography>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Equipamento / Descrição</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold', color: '#000' }}>Qtd</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Valor Unit.</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Total</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Object.entries(formData.equipment).map(([key, quantity]) => {
+                        if (quantity > 0) {
+                          const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
+                          if (equipmentItem) {
+                            return createTableRow(
+                              equipmentItem.name,
+                              equipmentItem.description,
+                              equipmentItem.price,
+                              quantity
+                            );
+                          }
+                        }
+                        return null;
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+
+                {/* Galeria de Imagens dos Equipamentos */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#000' }}>
+                    Equipamentos Selecionados:
+                  </Typography>
+                  <Grid container spacing={2}>
                     {Object.entries(formData.equipment).map(([key, quantity]) => {
                       if (quantity > 0) {
                         const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                        if (equipmentItem) {
-                          return createTableRow(
-                            equipmentItem.name,
-                            equipmentItem.description,
-                            equipmentItem.price,
-                            quantity
+                        const imageUrl = equipmentImages[key as keyof typeof equipmentImages];
+                        
+                        if (equipmentItem && imageUrl) {
+                          return (
+                            <Grid item xs={6} sm={4} md={3} key={key}>
+                              <Box sx={{ 
+                                textAlign: 'center', 
+                                p: 2, 
+                                border: '1px solid #e0e0e0', 
+                                borderRadius: 2, 
+                                backgroundColor: '#fafafa',
+                                minHeight: '200px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <img 
+                                  src={imageUrl} 
+                                  alt={equipmentItem.name}
+                                  crossOrigin="anonymous"
+                                  style={{ 
+                                    width: '100%', 
+                                    maxWidth: '120px', 
+                                    height: 'auto',
+                                    maxHeight: '100px',
+                                    objectFit: 'contain',
+                                    marginBottom: '12px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    padding: '4px',
+                                    backgroundColor: '#fff'
+                                  }} 
+                                />
+                                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
+                                  {equipmentItem.name}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
+                                  Quantidade: {quantity}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                                  R$ {formatCurrencyValue(equipmentItem.price)}
+                                </Typography>
+                              </Box>
+                            </Grid>
                           );
                         }
                       }
                       return null;
                     })}
-                    
-                    {/* Total dos Equipamentos */}
-                    <TableRow sx={{ backgroundColor: '#fff8e1' }}>
-                      <TableCell colSpan={3} sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#000' }}>
-                        TOTAL EQUIPAMENTOS
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#f57c00' }}>
-                        R$ {formatCurrencyValue(equipmentTotal)}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                  </Grid>
+                </Box>
+              </Paper>
 
-              {/* Galeria de Imagens dos Equipamentos */}
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#000' }}>
-                  Equipamentos Selecionados:
+              {/* TOTAL EQUIPAMENTOS */}
+              <Paper elevation={0} sx={{ p: 3, mb: 4, backgroundColor: '#fff8e1', border: '2px solid #f57c00' }}>
+                <Typography variant="h5" sx={{ color: '#f57c00', fontWeight: 'bold', textAlign: 'center' }}>
+                  🛠️ TOTAL EQUIPAMENTOS: R$ {formatCurrencyValue(equipmentTotal)}
                 </Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(formData.equipment).map(([key, quantity]) => {
-                    if (quantity > 0) {
-                      const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                      const imageUrl = equipmentImages[key as keyof typeof equipmentImages];
-                      
-                      if (equipmentItem && imageUrl) {
-                        return (
-                          <Grid item xs={6} sm={4} md={3} key={key}>
-                            <Box sx={{ 
-                              textAlign: 'center', 
-                              p: 2, 
-                              border: '1px solid #e0e0e0', 
-                              borderRadius: 2, 
-                              backgroundColor: '#fafafa',
-                              minHeight: '200px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <img 
-                                src={imageUrl} 
-                                alt={equipmentItem.name}
-                                crossOrigin="anonymous"
-                                style={{ 
-                                  width: '100%', 
-                                  maxWidth: '120px', 
-                                  height: 'auto',
-                                  maxHeight: '100px',
-                                  objectFit: 'contain',
-                                  marginBottom: '12px',
-                                  border: '1px solid #ddd',
-                                  borderRadius: '4px',
-                                  padding: '4px',
-                                  backgroundColor: '#fff'
-                                }} 
-                              />
-                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
-                                {equipmentItem.name}
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
-                                Quantidade: {quantity}
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                                R$ {formatCurrencyValue(equipmentItem.price)}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                        );
-                      }
-                    }
-                    return null;
-                  })}
-                </Grid>
-              </Box>
-            </Paper>
+              </Paper>
+            </>
           )}
 
           {/* Resumo Final */}
@@ -432,6 +434,139 @@ const Summary = ({ formData }: SummaryProps) => {
               </Grid>
             </Grid>
           </Paper>
+
+          {/* QUEBRA DE PÁGINA */}
+          <Box sx={{ pageBreakBefore: 'always', pt: 4 }}>
+            
+            {/* SEGUNDA PÁGINA - RESUMO IMPLANTAÇÃO */}
+            
+            {/* Header da segunda página */}
+            <PDFHeader />
+
+            {/* Informações do Cliente na segunda página */}
+            <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                📋 Informações do Cliente
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography sx={{ color: '#000' }}><strong>Nome:</strong> {formData.clientInfo.name}</Typography>
+                  <Typography sx={{ color: '#000' }}><strong>Empresa:</strong> {formData.clientInfo.companyName}</Typography>
+                  <Typography sx={{ color: '#000' }}><strong>CNPJ:</strong> {formData.clientInfo.cnpj}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography sx={{ color: '#000' }}><strong>Telefone:</strong> {formData.clientInfo.phone}</Typography>
+                  <Typography sx={{ color: '#000' }}><strong>Email:</strong> {formData.clientInfo.email}</Typography>
+                </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Conteúdo da Implantação */}
+            <Paper elevation={0} sx={{ p: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+              <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 4 }}>
+                RESUMO IMPLANTAÇÃO
+              </Typography>
+
+              {/* Cardápio */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  📋 Cardápio
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  ☐ Importação de cardápio via planilha Excel
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  ☐ Cadastro de cardápio – Até 100 itens*
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
+                  *Em caso de modificadores ou itens extras como: queijo, tomate, leite condensado e outros, cada modificador contará como item no cardápio.
+                </Typography>
+              </Box>
+
+              {/* Dados Fiscais */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🧾 Dados para emissão Fiscal
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  1. Enviar o comprovante de credenciamento no Estado para emissão de NFC-e;
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  2. Informar o CRT (Código de Regime Tributário);
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  3. Enviar o CSC (Código de Segurança do Contribuinte) com o devido ID;
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  4. Informar alíquotas de tributação que incidirão nos produtos (ICMS/ISS, CFOP, CST, PIS/COFINS);
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  5. Enviar o Certificado Digital A1 em arquivo PFX e senha;
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  6. Enviar o Token do IBPT - https://deolhonoimposto.ibpt.org.br/Site/PassoPasso
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  7. Planilha com descrição, grupo, preço de venda, NCM e CEST dos produtos.
+                </Typography>
+              </Box>
+
+              {/* Jornada do Cliente */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🚀 Jornada do Cliente
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  Após o pagamento, faremos o faturamento de sua licença e, em até 1 dia útil um dos nossos Especialistas entrará em contato para conferência de dados e agendamento dos treinamentos.
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  Após a implantação, é só desfrutar de toda inovação e tecnologia que o PDV Legal levará para o seu negócio! 🤩
+                </Typography>
+                <Typography sx={{ color: '#000', fontWeight: 'bold' }}>
+                  Importante! Lembre-se de contar comigo em qualquer momento de nossa parceria. 😀
+                </Typography>
+              </Box>
+
+              {/* Treinamento */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  💻 Treinamento
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  Para o treinamento é imprescindível o uso do computador ou notebook, além dos equipamentos sugeridos para infraestrutura em mãos.
+                </Typography>
+                <Typography sx={{ color: '#000' }}>
+                  Nossos treinamentos são realizados de forma remota, via Google Meet. Mas não se preocupe, minutos antes de iniciar te enviaremos o link de acesso e qualquer dúvida nossos Especialistas estarão prontos para ajudar.
+                </Typography>
+              </Box>
+
+              {/* Horário e Atendimento */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🕑 Horário e canais de atendimento
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>Telefone/WhatsApp:</strong> 11 4210-1779
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>E-mail:</strong> suporte@seatec.com.br
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>Suporte Emergencial:</strong> Segunda a Segunda: 8h às 23:59h
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>Treinamentos e Dúvidas:</strong> Seg a Sexta: 9h às 18h
+                </Typography>
+              </Box>
+
+              {/* Mensagem Final */}
+              <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
+                <Typography variant="h6" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                  Agradecemos a confiança e desejamos que este seja o início de uma parceria de sucesso! 💙
+                </Typography>
+              </Box>
+            </Paper>
+          </Box>
         </Box>
       </Box>
 
