@@ -83,6 +83,18 @@
       "price": 1390.00,
       "image": "/src/assets/raspberryServer.jpeg",
       "description": "Servidor local Raspberry Pi"
+    },
+    "Elgin M10 Pro": {
+      "name": "Servidor Raspberry Pi",
+      "price": 1390.00,
+      "image": "/src/assets/raspberryServer.jpeg",
+      "description": "Mini PDV ANDROID Elgin"
+    },
+    "Tanca tp-650": {
+      "name": "Impressora Tanca",
+      "price": 1390.00,
+      "image": "/src/assets/raspberryServer.jpeg",
+      "description": "Impressora Termica"
     }
   }
 }
