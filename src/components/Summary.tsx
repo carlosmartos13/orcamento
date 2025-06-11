@@ -3,6 +3,7 @@ import { FormData } from '../types';
 import { usePDF } from 'react-to-pdf';
 import { usePricing } from '../hooks/usePricing';
 import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage } from '../utils/calculations';
+import { useState, useCallback } from 'react';
 
 interface SummaryProps {
   formData: FormData;
@@ -10,6 +11,7 @@ interface SummaryProps {
 }
 
 const Summary = ({ formData }: SummaryProps) => {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { toPDF, targetRef } = usePDF({ 
     filename: 'orcamento-seatec.pdf',
     page: { margin: 20 }
@@ -24,6 +26,53 @@ const Summary = ({ formData }: SummaryProps) => {
     const fullMessage = encodeURIComponent(message);
     window.open(`https://api.whatsapp.com/send?&text=${fullMessage}`, '_blank');
   };
+
+  // Função para aguardar o carregamento de todas as imagens
+  const waitForImages = useCallback((): Promise<void> => {
+    return new Promise((resolve) => {
+      const images = targetRef.current?.querySelectorAll('img') || [];
+      if (images.length === 0) {
+        resolve();
+        return;
+      }
+
+      let loadedCount = 0;
+      const totalImages = images.length;
+
+      const checkAllLoaded = () => {
+        loadedCount++;
+        if (loadedCount === totalImages) {
+          resolve();
+        }
+      };
+
+      images.forEach((img) => {
+        if (img.complete) {
+          checkAllLoaded();
+        } else {
+          img.onload = checkAllLoaded;
+          img.onerror = checkAllLoaded; // Conta também imagens com erro
+        }
+      });
+    });
+  }, [targetRef]);
+
+  // Função para gerar PDF com aguardo das imagens
+  const handleGeneratePDF = useCallback(async () => {
+    setIsGeneratingPDF(true);
+    try {
+      // Aguarda o carregamento de todas as imagens
+      await waitForImages();
+      // Aguarda um pouco mais para garantir que tudo foi renderizado
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Gera o PDF
+      await toPDF();
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  }, [waitForImages, toPDF]);
 
   // Função para criar linha da tabela
   const createTableRow = (name: string, description: string, price: number, quantity: number = 1, total?: number) => (
@@ -275,6 +324,7 @@ const Summary = ({ formData }: SummaryProps) => {
                               <img 
                                 src={equipmentItem.image} 
                                 alt={equipmentItem.name}
+                                crossOrigin="anonymous"
                                 style={{ 
                                   width: '100%', 
                                   maxWidth: '120px', 
@@ -287,10 +337,16 @@ const Summary = ({ formData }: SummaryProps) => {
                                   padding: '4px',
                                   backgroundColor: '#fff'
                                 }} 
+                                onLoad={(e) => {
+                                  // Marca a imagem como carregada
+                                  const target = e.target as HTMLImageElement;
+                                  target.setAttribute('data-loaded', 'true');
+                                }}
                                 onError={(e) => {
                                   // Fallback caso a imagem não carregue
                                   const target = e.target as HTMLImageElement;
                                   target.style.display = 'none';
+                                  target.setAttribute('data-loaded', 'true');
                                 }}
                               />
                               <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
@@ -382,7 +438,8 @@ const Summary = ({ formData }: SummaryProps) => {
         </Button>
         <Button 
           variant="contained" 
-          onClick={() => toPDF()} 
+          onClick={handleGeneratePDF} 
+          disabled={isGeneratingPDF}
           size="large"
           sx={{ 
             backgroundColor: '#1976d2',
@@ -395,7 +452,7 @@ const Summary = ({ formData }: SummaryProps) => {
             }
           }}
         >
-          📄 Baixar PDF
+          {isGeneratingPDF ? '⏳ Gerando PDF...' : '📄 Baixar PDF'}
         </Button>
       </Box>
     </>
