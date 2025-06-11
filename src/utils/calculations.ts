@@ -56,7 +56,7 @@ export const generateWhatsAppMessage = (
   const totalGeral = monthlyTotal + equipmentTotal;
 
   const messageLines = [
-    "🏠 *Orçamento SEATEC*",
+    "🏠 *Orçamento SEATEC | PDVLEGAL*",
     "",
     "👤 *Cliente:*",
     `Nome: ${formData.clientInfo.name}`,
