@@ -3,6 +3,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { FormData } from '../../types';
 import { usePricing } from '../../hooks/usePricing';
+import { formatCurrencyValue } from '../../utils/formatCurrency';
 
 interface StepProps {
   formData: FormData;
@@ -38,7 +39,7 @@ const EquipmentStep = ({ formData, setFormData }: StepProps) => {
         <Grid item xs={12} sm={6}>
           <Typography>{equipmentItem.name}</Typography>
           <Typography variant="body2" color="text.secondary">
-            R$ {equipmentItem.price.toFixed(2)}
+            R$ {formatCurrencyValue(equipmentItem.price)}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6} container alignItems="center" spacing={1}>

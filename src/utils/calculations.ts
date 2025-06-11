@@ -1,5 +1,6 @@
 import { FormData } from '../types';
 import { PricingData } from '../hooks/usePricing';
+import { formatWhatsAppCurrency } from './formatCurrency';
 
 export const calculateMonthlyTotal = (formData: FormData, pricing: PricingData): number => {
   let total = 0;
@@ -64,25 +65,25 @@ export const generateWhatsAppMessage = (
     `Telefone: ${formData.clientInfo.phone}`,
     `Email: ${formData.clientInfo.email}`,
     "",
-    `💰 *Mensalidade: R$ ${monthlyTotal.toFixed(2)}*`,
-    `✅ ${pricing.modules.cloud.name}: R$ ${pricing.modules.cloud.price.toFixed(2)}`,
-    formData.subscription.fiscal ? `✅ ${pricing.modules.fiscal.name}: R$ ${pricing.modules.fiscal.price.toFixed(2)}` : `❌ ${pricing.modules.fiscal.name}`,
-    formData.subscription.inventory ? `✅ ${pricing.modules.inventory.name}: R$ ${pricing.modules.inventory.price.toFixed(2)}` : `❌ ${pricing.modules.inventory.name}`,
-    formData.subscription.financial ? `✅ ${pricing.modules.financial.name}: R$ ${pricing.modules.financial.price.toFixed(2)}` : `❌ ${pricing.modules.financial.name}`,
-    `✅ PDVs: ${formData.subscription.pdvCount} x R$ ${pricing.modules.pdv.price.toFixed(2)} = R$ ${(formData.subscription.pdvCount * pricing.modules.pdv.price).toFixed(2)}`,
+    `💰 *Mensalidade: R$ ${formatWhatsAppCurrency(monthlyTotal)}*`,
+    `✅ ${pricing.modules.cloud.name}: R$ ${formatWhatsAppCurrency(pricing.modules.cloud.price)}`,
+    formData.subscription.fiscal ? `✅ ${pricing.modules.fiscal.name}: R$ ${formatWhatsAppCurrency(pricing.modules.fiscal.price)}` : `❌ ${pricing.modules.fiscal.name}`,
+    formData.subscription.inventory ? `✅ ${pricing.modules.inventory.name}: R$ ${formatWhatsAppCurrency(pricing.modules.inventory.price)}` : `❌ ${pricing.modules.inventory.name}`,
+    formData.subscription.financial ? `✅ ${pricing.modules.financial.name}: R$ ${formatWhatsAppCurrency(pricing.modules.financial.price)}` : `❌ ${pricing.modules.financial.name}`,
+    `✅ PDVs: ${formData.subscription.pdvCount} x R$ ${formatWhatsAppCurrency(pricing.modules.pdv.price)} = R$ ${formatWhatsAppCurrency(formData.subscription.pdvCount * pricing.modules.pdv.price)}`,
     "",
     "📦 *Adicionais:*",
-    formData.additionals.legalLoyalty ? `✅ ${pricing.additionals.legalLoyalty.name}: R$ ${pricing.additionals.legalLoyalty.price.toFixed(2)}` : `❌ ${pricing.additionals.legalLoyalty.name}`,
+    formData.additionals.legalLoyalty ? `✅ ${pricing.additionals.legalLoyalty.name}: R$ ${formatWhatsAppCurrency(pricing.additionals.legalLoyalty.price)}` : `❌ ${pricing.additionals.legalLoyalty.name}`,
     formData.additionals.delivery === "none"
       ? "❌ Delivery Legal"
       : formData.additionals.delivery === "basic"
-        ? `✅ ${pricing.additionals.deliveryBasic.name}: R$ ${pricing.additionals.deliveryBasic.price.toFixed(2)}`
-        : `✅ ${pricing.additionals.deliveryPlus.name}: R$ ${pricing.additionals.deliveryPlus.price.toFixed(2)}`,
+        ? `✅ ${pricing.additionals.deliveryBasic.name}: R$ ${formatWhatsAppCurrency(pricing.additionals.deliveryBasic.price)}`
+        : `✅ ${pricing.additionals.deliveryPlus.name}: R$ ${formatWhatsAppCurrency(pricing.additionals.deliveryPlus.price)}`,
     formData.additionals.selfServiceTerminals > 0
-      ? `✅ ${pricing.additionals.selfServiceTerminal.name}: ${formData.additionals.selfServiceTerminals} x R$ ${pricing.additionals.selfServiceTerminal.price.toFixed(2)} = R$ ${(formData.additionals.selfServiceTerminals * pricing.additionals.selfServiceTerminal.price).toFixed(2)}`
+      ? `✅ ${pricing.additionals.selfServiceTerminal.name}: ${formData.additionals.selfServiceTerminals} x R$ ${formatWhatsAppCurrency(pricing.additionals.selfServiceTerminal.price)} = R$ ${formatWhatsAppCurrency(formData.additionals.selfServiceTerminals * pricing.additionals.selfServiceTerminal.price)}`
       : `❌ ${pricing.additionals.selfServiceTerminal.name}`,
     "",
-    `🛠 *Equipamentos: R$ ${equipmentTotal.toFixed(2).replace('.', ',')}*`,
+    `🛠 *Equipamentos: R$ ${formatWhatsAppCurrency(equipmentTotal)}*`,
   ];
 
   // Adicionar equipamentos selecionados
@@ -90,12 +91,12 @@ export const generateWhatsAppMessage = (
     if (quantity > 0) {
       const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
       if (equipmentItem) {
-        messageLines.push(`✅ ${quantity} ${equipmentItem.name}:  R$ ${equipmentItem.price.toFixed(2).replace('.', ',')} `);
+        messageLines.push(`✅ ${quantity} ${equipmentItem.name}: R$ ${formatWhatsAppCurrency(equipmentItem.price)} cada`);
       }
     }
   });
 
-  messageLines.push("", `💳 *Total Geral: R$ ${totalGeral.toFixed(2)}*`);
+  messageLines.push("", `💳 *Total Geral: R$ ${formatWhatsAppCurrency(totalGeral)}*`);
 
   return messageLines.join('\n');
 };

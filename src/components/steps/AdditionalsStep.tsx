@@ -3,6 +3,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { FormData } from '../../types';
 import { usePricing } from '../../hooks/usePricing';
+import { formatCurrencyValue } from '../../utils/formatCurrency';
 
 interface StepProps {
   formData: FormData;
@@ -53,7 +54,7 @@ const AdditionalsStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleLoyaltyChange}
             />
           }
-          label={`${pricing.additionals.legalLoyalty.name} (R$ ${pricing.additionals.legalLoyalty.price.toFixed(2)})`}
+          label={`${pricing.additionals.legalLoyalty.name} (R$ ${formatCurrencyValue(pricing.additionals.legalLoyalty.price)})`}
         />
       </Grid>
       
@@ -73,12 +74,12 @@ const AdditionalsStep = ({ formData, setFormData }: StepProps) => {
           <FormControlLabel
             value="basic"
             control={<Radio />}
-            label={`${pricing.additionals.deliveryBasic.name} (R$ ${pricing.additionals.deliveryBasic.price.toFixed(2)})`}
+            label={`${pricing.additionals.deliveryBasic.name} (R$ ${formatCurrencyValue(pricing.additionals.deliveryBasic.price)})`}
           />
           <FormControlLabel
             value="plus"
             control={<Radio />}
-            label={`${pricing.additionals.deliveryPlus.name} (R$ ${pricing.additionals.deliveryPlus.price.toFixed(2)})`}
+            label={`${pricing.additionals.deliveryPlus.name} (R$ ${formatCurrencyValue(pricing.additionals.deliveryPlus.price)})`}
           />
         </RadioGroup>
       </Grid>
@@ -87,7 +88,7 @@ const AdditionalsStep = ({ formData, setFormData }: StepProps) => {
         <Grid container alignItems="center" spacing={2}>
           <Grid item>
             <Typography variant="subtitle1">
-              {pricing.additionals.selfServiceTerminal.name} (R$ {pricing.additionals.selfServiceTerminal.price.toFixed(2)} cada)
+              {pricing.additionals.selfServiceTerminal.name} (R$ {formatCurrencyValue(pricing.additionals.selfServiceTerminal.price)} cada)
             </Typography>
           </Grid>
           <Grid item>

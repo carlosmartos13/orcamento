@@ -3,7 +3,8 @@ import { FormData } from '../types';
 import { usePDF } from 'react-to-pdf';
 import { usePricing } from '../hooks/usePricing';
 import { calculateMonthlyTotal, calculateEquipmentTotal, generateWhatsAppMessage } from '../utils/calculations';
-import { useState, useCallback } from 'react';
+import { formatCurrencyValue } from '../utils/formatCurrency';
+import { useState, useCallback, useEffect } from 'react';
 import { equipmentImages } from '../assets/images';
 
 interface SummaryProps {
@@ -13,10 +14,16 @@ interface SummaryProps {
 
 const Summary = ({ formData }: SummaryProps) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  
   const { toPDF, targetRef } = usePDF({ 
     filename: 'orcamento-seatec.pdf',
-    page: { margin: 20 }
+    page: { 
+      margin: 20,
+      format: 'a4'
+    }
   });
+  
   const { pricing } = usePricing();
   
   const monthlyTotal = calculateMonthlyTotal(formData, pricing);
@@ -28,44 +35,37 @@ const Summary = ({ formData }: SummaryProps) => {
     window.open(`https://api.whatsapp.com/send?&text=${fullMessage}`, '_blank');
   };
 
-  // Função para aguardar o carregamento de todas as imagens
-  const waitForImages = useCallback((): Promise<void> => {
-    return new Promise((resolve) => {
-      const images = targetRef.current?.querySelectorAll('img') || [];
-      if (images.length === 0) {
-        resolve();
-        return;
-      }
-
-      let loadedCount = 0;
-      const totalImages = images.length;
-
-      const checkAllLoaded = () => {
-        loadedCount++;
-        if (loadedCount === totalImages) {
-          resolve();
-        }
-      };
-
-      images.forEach((img) => {
-        if (img.complete && img.naturalHeight !== 0) {
-          checkAllLoaded();
-        } else {
-          img.onload = checkAllLoaded;
-          img.onerror = checkAllLoaded;
-        }
+  // Pré-carrega todas as imagens
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagePromises = Object.values(equipmentImages).map((src) => {
+        return new Promise<void>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Resolve mesmo com erro para não travar
+          img.src = src;
+        });
       });
-    });
-  }, [targetRef]);
+
+      await Promise.all(imagePromises);
+      setImagesLoaded(true);
+    };
+
+    preloadImages();
+  }, []);
 
   // Função para gerar PDF com aguardo das imagens
   const handleGeneratePDF = useCallback(async () => {
     setIsGeneratingPDF(true);
     try {
-      // Aguarda o carregamento de todas as imagens
-      await waitForImages();
-      // Aguarda um pouco mais para garantir que tudo foi renderizado
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Aguarda as imagens serem carregadas
+      if (!imagesLoaded) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+      
+      // Aguarda um pouco mais para garantir renderização
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Gera o PDF
       await toPDF();
     } catch (error) {
@@ -73,7 +73,7 @@ const Summary = ({ formData }: SummaryProps) => {
     } finally {
       setIsGeneratingPDF(false);
     }
-  }, [waitForImages, toPDF]);
+  }, [imagesLoaded, toPDF]);
 
   // Função para criar linha da tabela
   const createTableRow = (name: string, description: string, price: number, quantity: number = 1, total?: number) => (
@@ -90,10 +90,10 @@ const Summary = ({ formData }: SummaryProps) => {
         {quantity > 1 ? `${quantity}x` : '1x'}
       </TableCell>
       <TableCell align="right" sx={{ color: '#000' }}>
-        R$ {price.toFixed(2)}
+        R$ {formatCurrencyValue(price)}
       </TableCell>
       <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>
-        R$ {(total || price * quantity).toFixed(2)}
+        R$ {formatCurrencyValue(total || price * quantity)}
       </TableCell>
     </TableRow>
   );
@@ -196,7 +196,7 @@ const Summary = ({ formData }: SummaryProps) => {
                       TOTAL MENSALIDADE
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#1976d2' }}>
-                      R$ {monthlyTotal.toFixed(2)}
+                      R$ {formatCurrencyValue(monthlyTotal)}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -291,7 +291,7 @@ const Summary = ({ formData }: SummaryProps) => {
                         TOTAL EQUIPAMENTOS
                       </TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#f57c00' }}>
-                        R$ {equipmentTotal.toFixed(2)}
+                        R$ {formatCurrencyValue(equipmentTotal)}
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -327,6 +327,7 @@ const Summary = ({ formData }: SummaryProps) => {
                               <img 
                                 src={imageUrl} 
                                 alt={equipmentItem.name}
+                                crossOrigin="anonymous"
                                 style={{ 
                                   width: '100%', 
                                   maxWidth: '120px', 
@@ -339,17 +340,6 @@ const Summary = ({ formData }: SummaryProps) => {
                                   padding: '4px',
                                   backgroundColor: '#fff'
                                 }} 
-                                onLoad={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.setAttribute('data-loaded', 'true');
-                                  console.log(`Imagem carregada: ${equipmentItem.name}`);
-                                }}
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  target.setAttribute('data-loaded', 'true');
-                                  console.error(`Erro ao carregar imagem: ${equipmentItem.name}`);
-                                }}
                               />
                               <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
                                 {equipmentItem.name}
@@ -358,7 +348,7 @@ const Summary = ({ formData }: SummaryProps) => {
                                 Quantidade: {quantity}
                               </Typography>
                               <Typography variant="caption" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                                R$ {equipmentItem.price.toFixed(2)}
+                                R$ {formatCurrencyValue(equipmentItem.price)}
                               </Typography>
                             </Box>
                           </Grid>
@@ -384,7 +374,7 @@ const Summary = ({ formData }: SummaryProps) => {
                     Mensalidade
                   </Typography>
                   <Typography variant="h4" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                    R$ {monthlyTotal.toFixed(2)}
+                    R$ {formatCurrencyValue(monthlyTotal)}
                   </Typography>
                 </Box>
               </Grid>
@@ -395,7 +385,7 @@ const Summary = ({ formData }: SummaryProps) => {
                       Equipamentos (Único)
                     </Typography>
                     <Typography variant="h4" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
-                      R$ {equipmentTotal.toFixed(2)}
+                      R$ {formatCurrencyValue(equipmentTotal)}
                     </Typography>
                   </Box>
                 </Grid>
@@ -407,10 +397,10 @@ const Summary = ({ formData }: SummaryProps) => {
                     INVESTIMENTO TOTAL
                   </Typography>
                   <Typography variant="h3" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    R$ {(monthlyTotal + equipmentTotal).toFixed(2)}
+                    R$ {formatCurrencyValue(monthlyTotal + equipmentTotal)}
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 1, color: '#555' }}>
-                    {equipmentTotal > 0 ? `Mensalidade: R$ ${monthlyTotal.toFixed(2)} + Equipamentos: R$ ${equipmentTotal.toFixed(2)}` : 'Valor mensal'}
+                    {equipmentTotal > 0 ? `Mensalidade: R$ ${formatCurrencyValue(monthlyTotal)} + Equipamentos: R$ ${formatCurrencyValue(equipmentTotal)}` : 'Valor mensal'}
                   </Typography>
                 </Box>
               </Grid>

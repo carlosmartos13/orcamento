@@ -3,6 +3,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { FormData } from '../../types';
 import { usePricing } from '../../hooks/usePricing';
+import { formatCurrencyValue } from '../../utils/formatCurrency';
 
 interface StepProps {
   formData: FormData;
@@ -44,7 +45,7 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
               disabled={pricing.modules.cloud.required}
             />
           }
-          label={`${pricing.modules.cloud.name} (R$ ${pricing.modules.cloud.price.toFixed(2)}) - Obrigatório`}
+          label={`${pricing.modules.cloud.name} (R$ ${formatCurrencyValue(pricing.modules.cloud.price)}) - Obrigatório`}
         />
       </Grid>
       <Grid item xs={12}>
@@ -55,7 +56,7 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleCheckboxChange('fiscal')}
             />
           }
-          label={`${pricing.modules.fiscal.name} (R$ ${pricing.modules.fiscal.price.toFixed(2)})`}
+          label={`${pricing.modules.fiscal.name} (R$ ${formatCurrencyValue(pricing.modules.fiscal.price)})`}
         />
       </Grid>
       <Grid item xs={12}>
@@ -66,7 +67,7 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleCheckboxChange('inventory')}
             />
           }
-          label={`${pricing.modules.inventory.name} (R$ ${pricing.modules.inventory.price.toFixed(2)})`}
+          label={`${pricing.modules.inventory.name} (R$ ${formatCurrencyValue(pricing.modules.inventory.price)})`}
         />
       </Grid>
       <Grid item xs={12}>
@@ -77,14 +78,14 @@ const SubscriptionStep = ({ formData, setFormData }: StepProps) => {
               onChange={handleCheckboxChange('financial')}
             />
           }
-          label={`${pricing.modules.financial.name} (R$ ${pricing.modules.financial.price.toFixed(2)})`}
+          label={`${pricing.modules.financial.name} (R$ ${formatCurrencyValue(pricing.modules.financial.price)})`}
         />
       </Grid>
       <Grid item xs={12}>
         <Grid container alignItems="center" spacing={2}>
           <Grid item>
             <Typography variant="subtitle1">
-              {pricing.modules.pdv.name} (R$ {pricing.modules.pdv.price.toFixed(2)} cada)
+              {pricing.modules.pdv.name} (R$ {formatCurrencyValue(pricing.modules.pdv.price)} cada)
             </Typography>
           </Grid>
           <Grid item>
