@@ -82,7 +82,7 @@ export const generateWhatsAppMessage = (
       ? `✅ ${pricing.additionals.selfServiceTerminal.name}: ${formData.additionals.selfServiceTerminals} x R$ ${pricing.additionals.selfServiceTerminal.price.toFixed(2)} = R$ ${(formData.additionals.selfServiceTerminals * pricing.additionals.selfServiceTerminal.price).toFixed(2)}`
       : `❌ ${pricing.additionals.selfServiceTerminal.name}`,
     "",
-    `🛠 *Equipamentos: R$ ${equipmentTotal.toFixed(2)}*`,
+    `🛠 *Equipamentos: R$ ${equipmentTotal.toFixed(2).replace('.', ',')}*`,
   ];
 
   // Adicionar equipamentos selecionados
