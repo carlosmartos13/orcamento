@@ -7,7 +7,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { equipmentImages } from '../assets/images';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import pricingData from '../data/pricing.json';
+import modul  from '../data/pricing.json'
 
 interface SummaryProps {
   formData: FormData;
@@ -22,7 +22,6 @@ const Summary = ({ formData }: SummaryProps) => {
   
   const monthlyTotal = calculateMonthlyTotal(formData, pricing);
   const equipmentTotal = calculateEquipmentTotal(formData, pricing);
-  const implantacaoPrice = pricingData.modules.implantacao.price;
 
   const handleWhatsApp = () => {
     const message = generateWhatsAppMessage(formData, pricing, monthlyTotal, equipmentTotal);
@@ -52,7 +51,7 @@ const Summary = ({ formData }: SummaryProps) => {
     preloadImages();
   }, []);
 
-  // Função para gerar PDF com 4 páginas separadas
+  // Função para gerar PDF usando html2canvas + jsPDF
   const handleGeneratePDF = useCallback(async () => {
     setIsGeneratingPDF(true);
     try {
@@ -64,67 +63,44 @@ const Summary = ({ formData }: SummaryProps) => {
       // Aguarda um pouco mais para garantir renderização
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-
-      // Função para capturar e adicionar página
-      const addPageToPDF = async (elementId: string, isFirstPage = false) => {
-        const element = document.getElementById(elementId);
-        if (!element) {
-          console.warn(`Elemento ${elementId} não encontrado`);
-          return;
-        }
-
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          width: element.scrollWidth,
-          height: element.scrollHeight
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        if (!isFirstPage) {
-          pdf.addPage();
-        }
-
-        // Se a página for muito alta, dividir em múltiplas páginas
-        if (imgHeight > pageHeight) {
-          let heightLeft = imgHeight;
-          let position = 0;
-
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-
-          while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-          }
-        } else {
-          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-        }
-      };
-
-      // Página 1: Cliente + Mensalidade + Adicionais
-      await addPageToPDF('pdf-page-1', true);
-
-      // Página 2: Equipamentos (apenas se houver equipamentos)
-      if (equipmentTotal > 0) {
-        await addPageToPDF('pdf-page-2');
+      // Seleciona o elemento a ser convertido
+      const element = document.getElementById('pdf-content');
+      if (!element) {
+        throw new Error('Elemento PDF não encontrado');
       }
 
-      // Página 3: Resumo Financeiro
-      await addPageToPDF('pdf-page-3');
+      // Configurações do html2canvas
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: element.scrollWidth,
+        height: element.scrollHeight
+      });
 
-      // Página 4: Resumo Implantação
-      await addPageToPDF('pdf-page-4');
+      // Criar PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Adicionar primeira página
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Adicionar páginas adicionais se necessário
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
 
       // Salvar PDF
       pdf.save('orcamento-seatec.pdf');
@@ -134,7 +110,7 @@ const Summary = ({ formData }: SummaryProps) => {
     } finally {
       setIsGeneratingPDF(false);
     }
-  }, [imagesLoaded, equipmentTotal]);
+  }, [imagesLoaded]);
 
   // Função para criar linha da tabela
   const createTableRow = (name: string, description: string, price: number, quantity: number = 1, total?: number) => (
@@ -195,19 +171,20 @@ const Summary = ({ formData }: SummaryProps) => {
 
   return (
     <>
-      {/* PÁGINA 1: CLIENTE + MENSALIDADE + ADICIONAIS */}
+      {/* CONTEÚDO DO PDF */}
       <Box
-        id="pdf-page-1"
+        id="pdf-content"
         sx={{ 
           backgroundColor: '#ffffff', 
           padding: 4, 
           fontFamily: 'Arial, sans-serif', 
           color: '#000000',
-          minHeight: '100vh',
-          display: 'none' // Oculto na tela, visível apenas para PDF
+          minHeight: '100vh'
         }}
       >
         <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
+          {/* PRIMEIRA PÁGINA */}
+          
           {/* Header com Logo */}
           <PDFHeader />
 
@@ -271,12 +248,12 @@ const Summary = ({ formData }: SummaryProps) => {
                     pricing.modules.financial.price
                   )}
                   
-                  {/* PDVs Adicionais */}
+                  {/* PDVs Adicionais (apenas se houver mais de 1) */}
                   {formData.subscription.pdvCount > 1 && createTableRow(
                     pricing.modules.pdv.name + ' Adicional',
                     pricing.modules.pdv.description,
                     pricing.modules.pdv.price,
-                    formData.subscription.pdvCount - 1
+                    formData.subscription.pdvCount 
                   )}
                 </TableBody>
               </Table>
@@ -338,148 +315,114 @@ const Summary = ({ formData }: SummaryProps) => {
               💰 TOTAL MENSALIDADE: R$ {formatCurrencyValue(monthlyTotal)}
             </Typography>
           </Paper>
-        </Box>
-      </Box>
 
-      {/* PÁGINA 2: EQUIPAMENTOS (apenas se houver equipamentos) */}
-      {equipmentTotal > 0 && (
-        <Box
-          id="pdf-page-2"
-          sx={{ 
-            backgroundColor: '#ffffff', 
-            padding: 4, 
-            fontFamily: 'Arial, sans-serif', 
-            color: '#000000',
-            minHeight: '100vh',
-            display: 'none' // Oculto na tela, visível apenas para PDF
-          }}
-        >
-          <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
-            {/* Header com Logo */}
-            <PDFHeader />
+          {/* Equipamentos */}
+          {equipmentTotal > 0 && (
+            <>
+              <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🛠️ Equipamentos
+                </Typography>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Equipamento / Descrição</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold', color: '#000' }}>Qtd</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Valor Unit.</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Total</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Object.entries(formData.equipment).map(([key, quantity]) => {
+                        if (quantity > 0) {
+                          const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
+                          if (equipmentItem) {
+                            return createTableRow(
+                              equipmentItem.name,
+                              equipmentItem.description,
+                              equipmentItem.price,
+                              quantity
+                            );
+                          }
+                        }
+                        return null;
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
 
-            {/* Equipamentos */}
-            <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
-              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                🛠️ Equipamentos
-              </Typography>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                      <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Equipamento / Descrição</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold', color: '#000' }}>Qtd</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Valor Unit.</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#000' }}>Total</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
+                {/* Galeria de Imagens dos Equipamentos */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#000' }}>
+                    Equipamentos Selecionados:
+                  </Typography>
+                  <Grid container spacing={2}>
                     {Object.entries(formData.equipment).map(([key, quantity]) => {
                       if (quantity > 0) {
                         const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                        if (equipmentItem) {
-                          return createTableRow(
-                            equipmentItem.name,
-                            equipmentItem.description,
-                            equipmentItem.price,
-                            quantity
+                        const imageUrl = equipmentImages[key as keyof typeof equipmentImages];
+                        
+                        if (equipmentItem && imageUrl) {
+                          return (
+                            <Grid item xs={6} sm={4} md={3} key={key}>
+                              <Box sx={{ 
+                                textAlign: 'center', 
+                                p: 2, 
+                                border: '1px solid #e0e0e0', 
+                                borderRadius: 2, 
+                                backgroundColor: '#fafafa',
+                                minHeight: '200px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <img 
+                                  src={imageUrl} 
+                                  alt={equipmentItem.name}
+                                  crossOrigin="anonymous"
+                                  style={{ 
+                                    width: '100%', 
+                                    maxWidth: '120px', 
+                                    height: 'auto',
+                                    maxHeight: '100px',
+                                    objectFit: 'contain',
+                                    marginBottom: '12px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    padding: '4px',
+                                    backgroundColor: '#fff'
+                                  }} 
+                                />
+                                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
+                                  {equipmentItem.name}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
+                                  Quantidade: {quantity}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                                  R$ {formatCurrencyValue(equipmentItem.price)}
+                                </Typography>
+                              </Box>
+                            </Grid>
                           );
                         }
                       }
                       return null;
                     })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                  </Grid>
+                </Box>
+              </Paper>
 
-              {/* Galeria de Imagens dos Equipamentos */}
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#000' }}>
-                  Equipamentos Selecionados:
+              {/* TOTAL EQUIPAMENTOS */}
+              <Paper elevation={0} sx={{ p: 3, mb: 4, backgroundColor: '#fff8e1', border: '2px solid #f57c00' }}>
+                <Typography variant="h5" sx={{ color: '#f57c00', fontWeight: 'bold', textAlign: 'center' }}>
+                  🛠️ TOTAL EQUIPAMENTOS: R$ {formatCurrencyValue(equipmentTotal)}
                 </Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(formData.equipment).map(([key, quantity]) => {
-                    if (quantity > 0) {
-                      const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
-                      const imageUrl = equipmentImages[key as keyof typeof equipmentImages];
-                      
-                      if (equipmentItem && imageUrl) {
-                        return (
-                          <Grid item xs={6} sm={4} md={3} key={key}>
-                            <Box sx={{ 
-                              textAlign: 'center', 
-                              p: 2, 
-                              border: '1px solid #e0e0e0', 
-                              borderRadius: 2, 
-                              backgroundColor: '#fafafa',
-                              minHeight: '200px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <img 
-                                src={imageUrl} 
-                                alt={equipmentItem.name}
-                                crossOrigin="anonymous"
-                                style={{ 
-                                  width: '100%', 
-                                  maxWidth: '120px', 
-                                  height: 'auto',
-                                  maxHeight: '100px',
-                                  objectFit: 'contain',
-                                  marginBottom: '12px',
-                                  border: '1px solid #ddd',
-                                  borderRadius: '4px',
-                                  padding: '4px',
-                                  backgroundColor: '#fff'
-                                }} 
-                              />
-                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
-                                {equipmentItem.name}
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
-                                Quantidade: {quantity}
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                                R$ {formatCurrencyValue(equipmentItem.price)}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                        );
-                      }
-                    }
-                    return null;
-                  })}
-                </Grid>
-              </Box>
-            </Paper>
-
-            {/* TOTAL EQUIPAMENTOS */}
-            <Paper elevation={0} sx={{ p: 3, mb: 4, backgroundColor: '#fff8e1', border: '2px solid #f57c00' }}>
-              <Typography variant="h5" sx={{ color: '#f57c00', fontWeight: 'bold', textAlign: 'center' }}>
-                🛠️ TOTAL EQUIPAMENTOS: R$ {formatCurrencyValue(equipmentTotal)}
-              </Typography>
-            </Paper>
-          </Box>
-        </Box>
-      )}
-
-      {/* PÁGINA 3: RESUMO FINANCEIRO */}
-      <Box
-        id="pdf-page-3"
-        sx={{ 
-          backgroundColor: '#ffffff', 
-          padding: 4, 
-          fontFamily: 'Arial, sans-serif', 
-          color: '#000000',
-          minHeight: '100vh',
-          display: 'none' // Oculto na tela, visível apenas para PDF
-        }}
-      >
-        <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
-          {/* Header com Logo */}
-          <PDFHeader />
+              </Paper>
+            </>
+          )}
 
           {/* Resumo Final */}
           <Paper elevation={0} sx={{ p: 4, backgroundColor: '#f8f9fa', border: '1px solid #ddd' }}>
@@ -504,7 +447,7 @@ const Summary = ({ formData }: SummaryProps) => {
                     Implantação Online
                   </Typography>
                   <Typography variant="h4" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    R$ {formatCurrencyValue(implantacaoPrice)}
+                    R$ {formatCurrencyValue(modul.modules.implantacao.price)}
                   </Typography>
                 </Box>
               </Grid>
@@ -527,36 +470,18 @@ const Summary = ({ formData }: SummaryProps) => {
                     INVESTIMENTO TOTAL
                   </Typography>
                   <Typography variant="h3" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    R$ {formatCurrencyValue(monthlyTotal + equipmentTotal + implantacaoPrice)}
+                    R$ {formatCurrencyValue(monthlyTotal + equipmentTotal + modul.modules.implantacao.price)}
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 1, color: '#555' }}>
-                    Mensalidade: R$ {formatCurrencyValue(monthlyTotal)} + Implantação: R$ {formatCurrencyValue(implantacaoPrice)}{equipmentTotal > 0 ? ` + Equipamentos: R$ ${formatCurrencyValue(equipmentTotal)}` : ''}
+                    {equipmentTotal > 0 ? `Mensalidade: R$ ${formatCurrencyValue(monthlyTotal)} + Equipamentos: R$ ${formatCurrencyValue(equipmentTotal)}` : 'Valor mensal'}
                   </Typography>
                 </Box>
               </Grid>
             </Grid>
           </Paper>
-        </Box>
-      </Box>
-
-      {/* PÁGINA 4: RESUMO IMPLANTAÇÃO */}
-      <Box
-        id="pdf-page-4"
-        sx={{ 
-          backgroundColor: '#ffffff', 
-          padding: 4, 
-          fontFamily: 'Arial, sans-serif', 
-          color: '#000000',
-          minHeight: '100vh',
-          display: 'none' // Oculto na tela, visível apenas para PDF
-        }}
-      >
-        <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
-          {/* Header com Logo */}
-          <PDFHeader />
 
           {/* Conteúdo da Implantação */}
-          <Paper elevation={0} sx={{ p: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+          <Paper elevation={0} sx={{ p: 4, border: '1px solid #ddd', backgroundColor: '#fff', mt: 4 }}>
             <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 4 }}>
               RESUMO IMPLANTAÇÃO
             </Typography>
@@ -659,66 +584,6 @@ const Summary = ({ formData }: SummaryProps) => {
                 Agradecemos a confiança e desejamos que este seja o início de uma parceria de sucesso! 💙
               </Typography>
             </Box>
-          </Paper>
-        </Box>
-      </Box>
-
-      {/* CONTEÚDO VISÍVEL NA TELA (versão resumida) */}
-      <Box sx={{ backgroundColor: '#ffffff', padding: 4, fontFamily: 'Arial, sans-serif', color: '#000000' }}>
-        <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <PDFHeader />
-          
-          {/* Resumo para tela */}
-          <Paper elevation={0} sx={{ p: 4, backgroundColor: '#f8f9fa', border: '1px solid #ddd' }}>
-            <Typography variant="h5" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
-              💳 Resumo do Orçamento
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={4}>
-                <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e8f4fd', borderRadius: 2, border: '1px solid #ccc' }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                    Mensalidade
-                  </Typography>
-                  <Typography variant="h4" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                    R$ {formatCurrencyValue(monthlyTotal)}
-                  </Typography>
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12} sm={4}>
-                <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e8f5e8', borderRadius: 2, border: '1px solid #ccc' }}>
-                  <Typography variant="h6" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    Implantação Online
-                  </Typography>
-                  <Typography variant="h4" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    R$ {formatCurrencyValue(implantacaoPrice)}
-                  </Typography>
-                </Box>
-              </Grid>
-              {equipmentTotal > 0 && (
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#fff8e1', borderRadius: 2, border: '1px solid #ccc' }}>
-                    <Typography variant="h6" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
-                      Equipamentos
-                    </Typography>
-                    <Typography variant="h4" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
-                      R$ {formatCurrencyValue(equipmentTotal)}
-                    </Typography>
-                  </Box>
-                </Grid>
-              )}
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2, borderColor: '#ccc' }} />
-                <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
-                  <Typography variant="h5" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    INVESTIMENTO TOTAL
-                  </Typography>
-                  <Typography variant="h3" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    R$ {formatCurrencyValue(monthlyTotal + equipmentTotal + implantacaoPrice)}
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
           </Paper>
         </Box>
       </Box>
