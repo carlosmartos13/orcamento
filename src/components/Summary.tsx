@@ -33,20 +33,34 @@ const Summary = ({ formData }: SummaryProps) => {
   // Pré-carrega todas as imagens incluindo o logo
   useEffect(() => {
     const preloadImages = async () => {
-      const allImages = [...Object.values(equipmentImages), './logo.png'];
-      
-      const imagePromises = allImages.map((src) => {
-        return new Promise<void>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve(); // Resolve mesmo com erro para não travar
-          img.crossOrigin = 'anonymous';
-          img.src = src;
+      try {
+        // Lista de todas as imagens necessárias
+        const logoUrl = `${window.location.origin}/logo.png`;
+        const allImages = [logoUrl, ...Object.values(equipmentImages)];
+        
+        const imagePromises = allImages.map((src) => {
+          return new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              console.log(`Imagem carregada: ${src}`);
+              resolve();
+            };
+            img.onerror = (error) => {
+              console.warn(`Erro ao carregar imagem: ${src}`, error);
+              resolve(); // Resolve mesmo com erro para não travar
+            };
+            img.crossOrigin = 'anonymous';
+            img.src = src;
+          });
         });
-      });
 
-      await Promise.all(imagePromises);
-      setImagesLoaded(true);
+        await Promise.all(imagePromises);
+        console.log('Todas as imagens foram pré-carregadas');
+        setImagesLoaded(true);
+      } catch (error) {
+        console.error('Erro no pré-carregamento das imagens:', error);
+        setImagesLoaded(true); // Define como true mesmo com erro
+      }
     };
 
     preloadImages();
@@ -56,8 +70,11 @@ const Summary = ({ formData }: SummaryProps) => {
   const handleGeneratePDF = useCallback(async () => {
     setIsGeneratingPDF(true);
     try {
+      console.log('Iniciando geração do PDF...');
+      
       // Aguarda as imagens serem carregadas
       if (!imagesLoaded) {
+        console.log('Aguardando carregamento das imagens...');
         await new Promise(resolve => setTimeout(resolve, 3000));
       }
       
@@ -75,42 +92,65 @@ const Summary = ({ formData }: SummaryProps) => {
         const element = document.getElementById(pageIds[i]);
         
         // Pula páginas que não existem (como página 2 se não há equipamentos)
-        if (!element) continue;
+        if (!element) {
+          console.log(`Página ${pageIds[i]} não encontrada, pulando...`);
+          continue;
+        }
+        
+        console.log(`Processando página ${i + 1}: ${pageIds[i]}`);
         
         // Adiciona nova página (exceto para a primeira)
         if (i > 0) {
           pdf.addPage();
         }
 
-        // Captura a página
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          width: element.scrollWidth,
-          height: element.scrollHeight
-        });
+        try {
+          // Captura a página
+          const canvas = await html2canvas(element, {
+            scale: 1.5, // Reduzido de 2 para 1.5
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: element.scrollWidth,
+            height: element.scrollHeight,
+            onclone: (clonedDoc) => {
+              // Remove imagens problemáticas do clone se necessário
+              const images = clonedDoc.querySelectorAll('img');
+              images.forEach(img => {
+                if (img.src && !img.complete) {
+                  img.style.display = 'none';
+                }
+              });
+            }
+          });
 
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+          const imgData = canvas.toDataURL('image/jpeg', 0.8); // Usar JPEG com qualidade 0.8
+          const imgWidth = pageWidth;
+          const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
-        // Se a imagem for maior que a página, ajusta para caber
-        if (imgHeight > pageHeight) {
-          const ratio = pageHeight / imgHeight;
-          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth * ratio, pageHeight);
-        } else {
-          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+          // Se a imagem for maior que a página, ajusta para caber
+          if (imgHeight > pageHeight) {
+            const ratio = pageHeight / imgHeight;
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth * ratio, pageHeight);
+          } else {
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+          }
+          
+          console.log(`Página ${i + 1} processada com sucesso`);
+        } catch (pageError) {
+          console.error(`Erro ao processar página ${i + 1}:`, pageError);
+          // Continua para a próxima página em caso de erro
         }
       }
 
       // Salvar PDF
+      console.log('Salvando PDF...');
       pdf.save('orcamento-seatec.pdf');
+      console.log('PDF gerado com sucesso!');
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      alert('Erro ao gerar PDF. Tente novamente.');
+      alert(`Erro ao gerar PDF: ${error.message || 'Erro desconhecido'}. Tente novamente.`);
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -150,14 +190,18 @@ const Summary = ({ formData }: SummaryProps) => {
         zIndex: 1
       }}>
         <img 
-          src="/logo.png" 
+          src={`${window.location.origin}/logo.png`}
           alt="Logo SEATEC" 
           crossOrigin="anonymous"
           style={{ 
             height: '80px', 
             width: 'auto',
             objectFit: 'contain'
-          }} 
+          }}
+          onError={(e) => {
+            console.warn('Erro ao carregar logo:', e);
+            e.currentTarget.style.display = 'none';
+          }}
         />
       </Box>
       
@@ -418,7 +462,11 @@ const Summary = ({ formData }: SummaryProps) => {
                                     borderRadius: '4px',
                                     padding: '4px',
                                     backgroundColor: '#fff'
-                                  }} 
+                                  }}
+                                  onError={(e) => {
+                                    console.warn(`Erro ao carregar imagem do equipamento: ${imageUrl}`);
+                                    e.currentTarget.style.display = 'none';
+                                  }}
                                 />
                                 <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#000', mb: 1, fontSize: '0.8rem' }}>
                                   {equipmentItem.name}
