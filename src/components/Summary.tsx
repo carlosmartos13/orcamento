@@ -315,9 +315,12 @@ const Summary = ({ formData }: SummaryProps) => {
             </Typography>
           </Paper>
 
-          {/* Equipamentos */}
+          {/* QUEBRA DE PÁGINA ANTES DOS EQUIPAMENTOS */}
           {equipmentTotal > 0 && (
-            <>
+            <Box sx={{ pageBreakBefore: 'always', pt: 4 }}>
+              {/* Header repetido na nova página */}
+              <PDFHeader />
+              
               <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
                 <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
                   🛠️ Equipamentos
@@ -420,159 +423,165 @@ const Summary = ({ formData }: SummaryProps) => {
                   🛠️ TOTAL EQUIPAMENTOS: R$ {formatCurrencyValue(equipmentTotal)}
                 </Typography>
               </Paper>
-            </>
+            </Box>
           )}
 
-          {/* Resumo Final */}
-          <Paper elevation={0} sx={{ p: 4, backgroundColor: '#f8f9fa', border: '1px solid #ddd' }}>
-            <Typography variant="h5" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
-              💳 Resumo Financeiro
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e8f4fd', borderRadius: 2, border: '1px solid #ccc' }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                    Mensalidade
-                  </Typography>
-                  <Typography variant="h4" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                    R$ {formatCurrencyValue(monthlyTotal)}
-                  </Typography>
-                </Box>
-              </Grid>
-              {equipmentTotal > 0 && (
+          {/* QUEBRA DE PÁGINA ANTES DO RESUMO FINAL */}
+          <Box sx={{ pageBreakBefore: 'always', pt: 4 }}>
+            {/* Header repetido na nova página */}
+            <PDFHeader />
+
+            {/* Resumo Final */}
+            <Paper elevation={0} sx={{ p: 4, backgroundColor: '#f8f9fa', border: '1px solid #ddd' }}>
+              <Typography variant="h5" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
+                💳 Resumo Financeiro
+              </Typography>
+              <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
-                  <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#fff8e1', borderRadius: 2, border: '1px solid #ccc' }}>
-                    <Typography variant="h6" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
-                      Equipamentos (Único)
+                  <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e8f4fd', borderRadius: 2, border: '1px solid #ccc' }}>
+                    <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                      Mensalidade
                     </Typography>
-                    <Typography variant="h4" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
-                      R$ {formatCurrencyValue(equipmentTotal)}
+                    <Typography variant="h4" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                      R$ {formatCurrencyValue(monthlyTotal)}
                     </Typography>
                   </Box>
                 </Grid>
-              )}
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2, borderColor: '#ccc' }} />
-                <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
-                  <Typography variant="h5" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    INVESTIMENTO TOTAL
-                  </Typography>
-                  <Typography variant="h3" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                    R$ {formatCurrencyValue(monthlyTotal + equipmentTotal)}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 1, color: '#555' }}>
-                    {equipmentTotal > 0 ? `Mensalidade: R$ ${formatCurrencyValue(monthlyTotal)} + Equipamentos: R$ ${formatCurrencyValue(equipmentTotal)}` : 'Valor mensal'}
-                  </Typography>
-                </Box>
+                {equipmentTotal > 0 && (
+                  <Grid item xs={12} sm={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#fff8e1', borderRadius: 2, border: '1px solid #ccc' }}>
+                      <Typography variant="h6" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
+                        Equipamentos (Único)
+                      </Typography>
+                      <Typography variant="h4" sx={{ color: '#f57c00', fontWeight: 'bold' }}>
+                        R$ {formatCurrencyValue(equipmentTotal)}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 2, borderColor: '#ccc' }} />
+                  <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
+                    <Typography variant="h5" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                      INVESTIMENTO TOTAL
+                    </Typography>
+                    <Typography variant="h3" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                      R$ {formatCurrencyValue(monthlyTotal + equipmentTotal)}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1, color: '#555' }}>
+                      {equipmentTotal > 0 ? `Mensalidade: R$ ${formatCurrencyValue(monthlyTotal)} + Equipamentos: R$ ${formatCurrencyValue(equipmentTotal)}` : 'Valor mensal'}
+                    </Typography>
+                  </Box>
+                </Grid>
               </Grid>
-            </Grid>
-          </Paper>
+            </Paper>
 
-          {/* Conteúdo da Implantação */}
-          <Paper elevation={0} sx={{ p: 4, border: '1px solid #ddd', backgroundColor: '#fff', mt: 4 }}>
-            <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 4 }}>
-              RESUMO IMPLANTAÇÃO
-            </Typography>
+            {/* Conteúdo da Implantação */}
+            <Paper elevation={0} sx={{ p: 4, border: '1px solid #ddd', backgroundColor: '#fff', mt: 4 }}>
+              <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 4 }}>
+                RESUMO IMPLANTAÇÃO
+              </Typography>
 
-            {/* Cardápio */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                📋 Cardápio
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                ☐ Importação de cardápio via planilha Excel
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 2 }}>
-                ☐ Cadastro de cardápio – Até 100 itens*
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
-                *Em caso de modificadores ou itens extras como: queijo, tomate, leite condensado e outros, cada modificador contará como item no cardápio.
-              </Typography>
-            </Box>
+              {/* Cardápio */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  📋 Cardápio
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  ☐ Importação de cardápio via planilha Excel
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  ☐ Cadastro de cardápio – Até 100 itens*
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
+                  *Em caso de modificadores ou itens extras como: queijo, tomate, leite condensado e outros, cada modificador contará como item no cardápio.
+                </Typography>
+              </Box>
 
-            {/* Dados Fiscais */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                🧾 Dados para emissão Fiscal
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                1. Enviar o comprovante de credenciamento no Estado para emissão de NFC-e;
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                2. Informar o CRT (Código de Regime Tributário);
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                3. Enviar o CSC (Código de Segurança do Contribuinte) com o devido ID;
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                4. Informar alíquotas de tributação que incidirão nos produtos (ICMS/ISS, CFOP, CST, PIS/COFINS);
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                5. Enviar o Certificado Digital A1 em arquivo PFX e senha;
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                6. Enviar o Token do IBPT - https://deolhonoimposto.ibpt.org.br/Site/PassoPasso
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                7. Planilha com descrição, grupo, preço de venda, NCM e CEST dos produtos.
-              </Typography>
-            </Box>
+              {/* Dados Fiscais */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🧾 Dados para emissão Fiscal
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  1. Enviar o comprovante de credenciamento no Estado para emissão de NFC-e;
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  2. Informar o CRT (Código de Regime Tributário);
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  3. Enviar o CSC (Código de Segurança do Contribuinte) com o devido ID;
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  4. Informar alíquotas de tributação que incidirão nos produtos (ICMS/ISS, CFOP, CST, PIS/COFINS);
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  5. Enviar o Certificado Digital A1 em arquivo PFX e senha;
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  6. Enviar o Token do IBPT - https://deolhonoimposto.ibpt.org.br/Site/PassoPasso
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  7. Planilha com descrição, grupo, preço de venda, NCM e CEST dos produtos.
+                </Typography>
+              </Box>
 
-            {/* Jornada do Cliente */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                🚀 Jornada do Cliente
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 2 }}>
-                Após o pagamento, faremos o faturamento de sua licença e, em até 1 dia útil um dos nossos Especialistas entrará em contato para conferência de dados e agendamento dos treinamentos.
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 2 }}>
-                Após a implantação, é só desfrutar de toda inovação e tecnologia que o PDV Legal levará para o seu negócio! 🤩
-              </Typography>
-              <Typography sx={{ color: '#000', fontWeight: 'bold' }}>
-                Importante! Lembre-se de contar comigo em qualquer momento de nossa parceria. 😀
-              </Typography>
-            </Box>
+              {/* Jornada do Cliente */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🚀 Jornada do Cliente
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  Após o pagamento, faremos o faturamento de sua licença e, em até 1 dia útil um dos nossos Especialistas entrará em contato para conferência de dados e agendamento dos treinamentos.
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  Após a implantação, é só desfrutar de toda inovação e tecnologia que o PDV Legal levará para o seu negócio! 🤩
+                </Typography>
+                <Typography sx={{ color: '#000', fontWeight: 'bold' }}>
+                  Importante! Lembre-se de contar comigo em qualquer momento de nossa parceria. 😀
+                </Typography>
+              </Box>
 
-            {/* Treinamento */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                💻 Treinamento
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 2 }}>
-                Para o treinamento é imprescindível o uso do computador ou notebook, além dos equipamentos sugeridos para infraestrutura em mãos.
-              </Typography>
-              <Typography sx={{ color: '#000' }}>
-                Nossos treinamentos são realizados de forma remota, via Google Meet. Mas não se preocupe, minutos antes de iniciar te enviaremos o link de acesso e qualquer dúvida nossos Especialistas estarão prontos para ajudar.
-              </Typography>
-            </Box>
+              {/* Treinamento */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  💻 Treinamento
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 2 }}>
+                  Para o treinamento é imprescindível o uso do computador ou notebook, além dos equipamentos sugeridos para infraestrutura em mãos.
+                </Typography>
+                <Typography sx={{ color: '#000' }}>
+                  Nossos treinamentos são realizados de forma remota, via Google Meet. Mas não se preocupe, minutos antes de iniciar te enviaremos o link de acesso e qualquer dúvida nossos Especialistas estarão prontos para ajudar.
+                </Typography>
+              </Box>
 
-            {/* Horário e Atendimento */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
-                🕑 Horário e canais de atendimento
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                <strong>Telefone/WhatsApp:</strong> 11 4210-1779
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                <strong>E-mail:</strong> suporte@seatec.com.br
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                <strong>Suporte Emergencial:</strong> Segunda a Segunda: 8h às 23:59h
-              </Typography>
-              <Typography sx={{ color: '#000', mb: 1 }}>
-                <strong>Treinamentos e Dúvidas:</strong> Seg a Sexta: 9h às 18h
-              </Typography>
-            </Box>
+              {/* Horário e Atendimento */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                  🕑 Horário e canais de atendimento
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>Telefone/WhatsApp:</strong> 11 4210-1779
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>E-mail:</strong> suporte@seatec.com.br
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>Suporte Emergencial:</strong> Segunda a Segunda: 8h às 23:59h
+                </Typography>
+                <Typography sx={{ color: '#000', mb: 1 }}>
+                  <strong>Treinamentos e Dúvidas:</strong> Seg a Sexta: 9h às 18h
+                </Typography>
+              </Box>
 
-            {/* Mensagem Final */}
-            <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
-              <Typography variant="h6" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                Agradecemos a confiança e desejamos que este seja o início de uma parceria de sucesso! 💙
-              </Typography>
-            </Box>
-          </Paper>
+              {/* Mensagem Final */}
+              <Box sx={{ textAlign: 'center', p: 3, backgroundColor: '#e8f5e8', borderRadius: 2, border: '2px solid #4caf50' }}>
+                <Typography variant="h6" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                  Agradecemos a confiança e desejamos que este seja o início de uma parceria de sucesso! 💙
+                </Typography>
+              </Box>
+            </Paper>
+          </Box>
         </Box>
       </Box>
 
