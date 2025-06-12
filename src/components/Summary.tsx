@@ -33,7 +33,7 @@ const Summary = ({ formData }: SummaryProps) => {
   // Pré-carrega todas as imagens incluindo o logo
   useEffect(() => {
     const preloadImages = async () => {
-      const allImages = [...Object.values(equipmentImages), './logo.png'];
+      const allImages = [...Object.values(equipmentImages), '/logo.png'];
       
       const imagePromises = allImages.map((src) => {
         return new Promise<void>((resolve) => {
@@ -150,7 +150,7 @@ const Summary = ({ formData }: SummaryProps) => {
         zIndex: 1
       }}>
         <img 
-          src="./logo.png" 
+          src="/logo.png" 
           alt="Logo SEATEC" 
           crossOrigin="anonymous"
           style={{ 
