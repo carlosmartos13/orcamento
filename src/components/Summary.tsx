@@ -719,9 +719,386 @@ const Summary = ({ formData }: SummaryProps) => {
         </Box>
       </Box>
 
-      {/* RESUMO VISÍVEL NA TELA */}
+      {/* CONTEÚDO VISÍVEL NA TELA */}
       <Box sx={{ maxWidth: '1000px', margin: '0 auto' }}>
-        {/* Resumo Final Simplificado para a tela */}
+        {/* Header com Logo */}
+        <Box sx={{ position: 'relative', textAlign: 'center', mb: 4 }}>
+          <Box sx={{ 
+            position: 'absolute', 
+            top: 0, 
+            right: 0,
+            zIndex: 1
+          }}>
+            <img 
+              src={`${window.location.origin}/logo.png`}
+              alt="Logo SEATEC" 
+              style={{ 
+                height: '80px', 
+                width: 'auto',
+                objectFit: 'contain'
+              }}
+            />
+          </Box>
+          
+          <Box sx={{ pr: 10 }}>
+            <Typography variant="h4" sx={{ color: '#061349', fontWeight: 'bold' }}>
+              Orçamento SEATEC | PDVLEGAL
+            </Typography>
+            <Typography variant="subtitle1" sx={{ color: '#666', mt: 1 }}>
+              Sistema de Gestão | ERP + PDV
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Informações do Cliente */}
+        <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+          <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+            📋 Informações do Cliente
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Typography><strong>Nome:</strong> {formData.clientInfo.name}</Typography>
+              <Typography><strong>Empresa:</strong> {formData.clientInfo.companyName}</Typography>
+              <Typography><strong>CNPJ:</strong> {formData.clientInfo.cnpj}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography><strong>Telefone:</strong> {formData.clientInfo.phone}</Typography>
+              <Typography><strong>Email:</strong> {formData.clientInfo.email}</Typography>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {/* Mensalidade */}
+        <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+          <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+            💰 Assinatura Mensal
+          </Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Módulo / Descrição</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qtd</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>Valor Unit.</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Cloud - Obrigatório */}
+                <TableRow>
+                  <TableCell>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {pricing.modules.cloud.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                      {pricing.modules.cloud.description}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">1x</TableCell>
+                  <TableCell align="right">R$ {formatCurrencyValue(pricing.modules.cloud.price)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                    R$ {formatCurrencyValue(pricing.modules.cloud.price)}
+                  </TableCell>
+                </TableRow>
+                
+                {/* Módulos Opcionais */}
+                {formData.subscription.fiscal && (
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                        {pricing.modules.fiscal.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                        {pricing.modules.fiscal.description}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">1x</TableCell>
+                    <TableCell align="right">R$ {formatCurrencyValue(pricing.modules.fiscal.price)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                      R$ {formatCurrencyValue(pricing.modules.fiscal.price)}
+                    </TableCell>
+                  </TableRow>
+                )}
+                
+                {formData.subscription.inventory && (
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                        {pricing.modules.inventory.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                        {pricing.modules.inventory.description}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">1x</TableCell>
+                    <TableCell align="right">R$ {formatCurrencyValue(pricing.modules.inventory.price)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                      R$ {formatCurrencyValue(pricing.modules.inventory.price)}
+                    </TableCell>
+                  </TableRow>
+                )}
+                
+                {formData.subscription.financial && (
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                        {pricing.modules.financial.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                        {pricing.modules.financial.description}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">1x</TableCell>
+                    <TableCell align="right">R$ {formatCurrencyValue(pricing.modules.financial.price)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                      R$ {formatCurrencyValue(pricing.modules.financial.price)}
+                    </TableCell>
+                  </TableRow>
+                )}
+                
+                {/* PDVs */}
+                <TableRow>
+                  <TableCell>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {pricing.modules.pdv.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                      {pricing.modules.pdv.description}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">{formData.subscription.pdvCount}x</TableCell>
+                  <TableCell align="right">R$ {formatCurrencyValue(pricing.modules.pdv.price)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                    R$ {formatCurrencyValue(pricing.modules.pdv.price * formData.subscription.pdvCount)}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+
+        {/* Módulos Adicionais */}
+        {(formData.additionals.legalLoyalty || 
+          formData.additionals.delivery !== 'none' || 
+          formData.additionals.selfServiceTerminals > 0) && (
+          <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+            <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+              📦 Módulos Adicionais
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Adicional / Descrição</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qtd</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Valor Unit.</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {formData.additionals.legalLoyalty && (
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          {pricing.additionals.legalLoyalty.name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                          {pricing.additionals.legalLoyalty.description}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">1x</TableCell>
+                      <TableCell align="right">R$ {formatCurrencyValue(pricing.additionals.legalLoyalty.price)}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                        R$ {formatCurrencyValue(pricing.additionals.legalLoyalty.price)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  
+                  {formData.additionals.delivery === 'basic' && (
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          {pricing.additionals.deliveryBasic.name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                          {pricing.additionals.deliveryBasic.description}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">1x</TableCell>
+                      <TableCell align="right">R$ {formatCurrencyValue(pricing.additionals.deliveryBasic.price)}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                        R$ {formatCurrencyValue(pricing.additionals.deliveryBasic.price)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  
+                  {formData.additionals.delivery === 'plus' && (
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          {pricing.additionals.deliveryPlus.name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                          {pricing.additionals.deliveryPlus.description}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">1x</TableCell>
+                      <TableCell align="right">R$ {formatCurrencyValue(pricing.additionals.deliveryPlus.price)}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                        R$ {formatCurrencyValue(pricing.additionals.deliveryPlus.price)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  
+                  {formData.additionals.selfServiceTerminals > 0 && (
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          {pricing.additionals.selfServiceTerminal.name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                          {pricing.additionals.selfServiceTerminal.description}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">{formData.additionals.selfServiceTerminals}x</TableCell>
+                      <TableCell align="right">R$ {formatCurrencyValue(pricing.additionals.selfServiceTerminal.price)}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                        R$ {formatCurrencyValue(pricing.additionals.selfServiceTerminal.price * formData.additionals.selfServiceTerminals)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        )}
+
+        {/* TOTAL MENSALIDADE */}
+        <Paper elevation={0} sx={{ p: 3, mb: 4, backgroundColor: '#e8f4fd', border: '2px solid #1976d2' }}>
+          <Typography variant="h5" sx={{ color: '#1976d2', fontWeight: 'bold', textAlign: 'center' }}>
+            💰 TOTAL MENSALIDADE: R$ {formatCurrencyValue(monthlyTotal)}
+          </Typography>
+        </Paper>
+
+        {/* Equipamentos */}
+        {equipmentTotal > 0 && (
+          <>
+            <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #ddd', backgroundColor: '#fff' }}>
+              <Typography variant="h6" sx={{ color: '#061349', fontWeight: 'bold', mb: 2 }}>
+                🛠️ Equipamentos
+              </Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Equipamento / Descrição</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qtd</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Valor Unit.</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {Object.entries(formData.equipment).map(([key, quantity]) => {
+                      if (quantity > 0) {
+                        const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
+                        if (equipmentItem) {
+                          return (
+                            <TableRow key={key}>
+                              <TableCell>
+                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                  {equipmentItem.name}
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5, color: '#555' }}>
+                                  {equipmentItem.description}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="center">{quantity}x</TableCell>
+                              <TableCell align="right">R$ {formatCurrencyValue(equipmentItem.price)}</TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                                R$ {formatCurrencyValue(equipmentItem.price * quantity)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
+                      }
+                      return null;
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Galeria de Imagens dos Equipamentos */}
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2 }}>
+                  Equipamentos Selecionados:
+                </Typography>
+                <Grid container spacing={2}>
+                  {Object.entries(formData.equipment).map(([key, quantity]) => {
+                    if (quantity > 0) {
+                      const equipmentItem = pricing.equipment[key as keyof typeof pricing.equipment];
+                      const imageUrl = equipmentImages[key as keyof typeof equipmentImages];
+                      
+                      if (equipmentItem && imageUrl) {
+                        return (
+                          <Grid item xs={6} sm={4} md={3} key={key}>
+                            <Box sx={{ 
+                              textAlign: 'center', 
+                              p: 2, 
+                              border: '1px solid #e0e0e0', 
+                              borderRadius: 2, 
+                              backgroundColor: '#fafafa',
+                              minHeight: '200px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <img 
+                                src={imageUrl} 
+                                alt={equipmentItem.name}
+                                style={{ 
+                                  width: '100%', 
+                                  maxWidth: '120px', 
+                                  height: 'auto',
+                                  maxHeight: '100px',
+                                  objectFit: 'contain',
+                                  marginBottom: '12px',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  padding: '4px',
+                                  backgroundColor: '#fff'
+                                }} 
+                              />
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1, fontSize: '0.8rem' }}>
+                                {equipmentItem.name}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
+                                Quantidade: {quantity}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                                R$ {formatCurrencyValue(equipmentItem.price)}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        );
+                      }
+                    }
+                    return null;
+                  })}
+                </Grid>
+              </Box>
+            </Paper>
+
+            {/* TOTAL EQUIPAMENTOS */}
+            <Paper elevation={0} sx={{ p: 3, mb: 4, backgroundColor: '#fff8e1', border: '2px solid #f57c00' }}>
+              <Typography variant="h5" sx={{ color: '#f57c00', fontWeight: 'bold', textAlign: 'center' }}>
+                🛠️ TOTAL EQUIPAMENTOS: R$ {formatCurrencyValue(equipmentTotal)}
+              </Typography>
+            </Paper>
+          </>
+        )}
+
+        {/* Resumo Final */}
         <Paper elevation={0} sx={{ p: 4, backgroundColor: '#f8f9fa', border: '1px solid #ddd' }}>
           <Typography variant="h5" sx={{ color: '#061349', fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
             💳 Resumo Financeiro
