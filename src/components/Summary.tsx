@@ -219,8 +219,8 @@ const Summary = ({ formData }: SummaryProps) => {
 
   return (
     <>
-      {/* CONTEÚDO DO PDF - OCULTO NA TELA */}
-      <Box sx={{ display: 'none' }}>
+      {/* CONTEÚDO DO PDF - POSICIONADO FORA DA TELA */}
+      <Box sx={{ position: 'absolute', left: '-9999px', top: '-9999px', zIndex: -1 }}>
         
         {/* PÁGINA 1 - MENSALIDADES */}
         <Box
