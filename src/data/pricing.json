@@ -1,0 +1,138 @@
+{
+  "modules": {
+    "implantacao": {
+      "name": "Implantação Online",
+      "price": 490,
+      "required": true,
+      "description": "O treinamento e a implantação online incluem: configuração dos equipamentos, treinamento da equipe, configuração fiscal em conjunto com a contabilidade, cadastro de até 100 itens, vídeos de apoio e acesso ao portal de ajuda online."
+    },
+    "cloud": {
+      "name": "Cloud",
+      "price": 89.90,
+      "required": true,
+      "description": "Sistema em nuvem - Diversos relatorios Exportável em excel, acesso de qualquer dispositivo com internet"
+    },
+    "fiscal": {
+      "name": "Fiscal",
+      "price": 79.90,
+      "required": false,
+      "description": "Módulo fiscal completo com emissão ilimitada de documentos fiscais: NFC-e, NF-e, SAT e MDF-e"
+    },
+    "fiscal2": {
+      "name": "Fiscal até 100 notas",
+      "price": 0,
+      "required": false,
+      "description": "Módulo fiscal completo, até 100 notas não sera cobrado, após isso será o valor será R$ 79,90 cobrado automaticamente na mensalidade"
+    },
+    "inventory": {
+      "name": "Estoque",
+      "price": 79.90,
+      "required": false,
+      "description": "Controle de estoque"
+    },
+    "financial": {
+      "name": "Financeiro",
+      "price": 79.90,
+      "required": false,
+      "description": "Módulo financeiro"
+    },
+    "pdv": {
+      "name": "PDV",
+      "price": 27.50,
+      "required": false,
+      "description": "Ponto de venda adicional"
+    },
+    "pdv1": {
+      "name": "PDV 1-2",
+      "price": 38.50,
+      "required": false,
+      "description": "Ponto de venda adicional"
+    },
+    "pdv2": {
+      "name": "PDV 2-5",
+      "price": 97.50,
+      "required": false,
+      "description": "Ponto de venda adicional"
+    },
+    "pdv3": {
+      "name": "PDV 5-10",
+      "price": 216.00,
+      "required": false,
+      "description": "Ponto de venda adicional"
+    }
+  },
+  "additionals": {
+    "legalLoyalty": {
+      "name": "Fidelidade Legal",
+      "price": 199.90,
+      "description": "Sistema de fidelidade completo"
+    },
+    "deliveryBasic": {
+      "name": "Delivery Legal (até 25k)",
+      "price": 199.90,
+      "description": "Sistema de delivery para faturamento até 25k"
+    },
+    "deliveryPlus": {
+      "name": "Delivery Legal Plus",
+      "price": 279.90,
+      "description": "Sistema de delivery para faturamento acima de 25k por mes"
+    },
+    "selfServiceTerminal": {
+      "name": "Terminal Auto Atendimento",
+      "price": 159.00,
+      "description": "Terminal de auto atendimento mensal"
+    }
+  },
+  "equipment": {
+    "androidPdvGertec": {
+      "name": "PDV Android Gertec GS300",
+      "price": 2590.00,
+      "description": "PDV Android completo da Gertec"
+    },
+    "androidPdvSunmi": {
+      "name": "PDV Android Sunmi D2",
+      "price": 1990.00,
+      "description": "PDV Android compacto da Sunmi"
+    },
+    "selfServiceTotemGertec": {
+      "name": "Totem Auto Atendimento Gertec",
+      "price": 3890.00,
+      "description": "Totem completo para auto atendimento"
+    },
+    "networkKit": {
+      "name": "Kit Rede (Roteador + Switch)",
+      "price": 549.00,
+      "description": "Kit completo de rede"
+    },
+    "raspberryServer": {
+      "name": "Servidor Raspberry Pi",
+      "price": 990.00,
+      "description": "Servidor local Raspberry Pi completo com fonte, case e disipadores, cartão de memoria configurado com Sistema Operacional"
+    },
+    "elginM10Pro": {
+      "name": "Mini PDV Android Elgin M10 Pro",
+      "price": 2390.00,
+      "description": "Mini PDV ANDROID Elgin"
+    },
+    "tancaTp650": {
+      "name": "Impressora Tanca TP-650",
+      "price": 690.00,
+      "description": "Impressora Termica"
+    },
+    "elgini9": {
+      "name": "Impressora Fiscal Elgin i9",
+      "price": 790.00,
+      "description": "Impressora fiscal térmica / produção"
+    },
+    "leitorCodigoBarras": {
+      "name": "Leitor Código de Barras",
+      "price": 490.00,
+      "description": "Leitor de código de barras com fio e suporte"
+    },
+    "gaveta": {
+      "name": "Gaveta de Dinheiro",
+      "price": 490.00,
+      "description": "Gaveta de dinheiro com 5 compartimentos acionamento automatico"
+    }
+  }
+}
