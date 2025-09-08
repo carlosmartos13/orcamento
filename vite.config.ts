@@ -5,32 +5,46 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: './', // Para funcionar em subdiretórios
+  
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false, // Remove sourcemaps para produção
-    minify: 'esbuild', // Usar esbuild ao invés de terser para melhor compatibilidade
-    target: 'es2015', // Compatibilidade com navegadores mais antigos
+    minify: 'esbuild',
+    target: 'esnext', // Melhor para modern browsers
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           mui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
-   
         }
       }
     },
     chunkSizeWarningLimit: 1600
   },
+  
+  // Configurações do server (apenas para desenvolvimento)
   server: {
     port: 5173,
-    host: true,
-    allowedHosts: true
+    host: '0.0.0.0', // Permite acesso externo no Docker
+    allowedHosts: [
+      'seatec-builders-orcamento-teste.ucwu5a.easypanel.host',
+      'localhost',
+      '127.0.0.1'
+    ]
   },
+  
+  // Configurações do preview (para preview de produção)
   preview: {
     port: 4173,
-    host: true
+    host: '0.0.0.0',
+    allowedHosts: [
+      'seatec-builders-orcamento-teste.ucwu5a.easypanel.host',
+      'localhost', 
+      '127.0.0.1'
+    ]
   },
+  
   optimizeDeps: {
     include: ['react', 'react-dom', '@mui/material', '@emotion/react', '@emotion/styled']
   }
