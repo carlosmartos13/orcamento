@@ -28,7 +28,7 @@ export default defineConfig({
     port: 5173,
     host: '0.0.0.0', // Permite acesso externo no Docker
     allowedHosts: [
-      'seatec-builders-orcamento-teste.ucwu5a.easypanel.host',
+      'seatec-builders-orcamento-test.ucwu5a.easypanel.host/',
       'localhost',
       '127.0.0.1'
     ]
@@ -39,7 +39,7 @@ export default defineConfig({
     port: 4173,
     host: '0.0.0.0',
     allowedHosts: [
-      'seatec-builders-orcamento-teste.ucwu5a.easypanel.host',
+      'seatec-builders-orcamento-test.ucwu5a.easypanel.host/',
       'localhost', 
       '127.0.0.1'
     ]
